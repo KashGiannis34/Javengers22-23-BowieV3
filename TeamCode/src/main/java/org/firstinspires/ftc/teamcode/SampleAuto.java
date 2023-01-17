@@ -24,9 +24,14 @@ package org.firstinspires.ftc.teamcode;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.ColorSensor;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.barcode.AprilTagDetectionPipeline;
+import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 import org.openftc.apriltag.AprilTagDetection;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
@@ -38,9 +43,24 @@ import java.util.concurrent.TimeUnit;
 @Autonomous(name = "Sample Auto")
 public class SampleAuto extends LinearOpMode
 {
+    // cone alignment variables...
+    int width = 800;
+    int height = 448;
+
     OpenCvCamera camera;
     AprilTagDetectionPipeline aprilTagDetectionPipeline;
     Brobot robot;
+
+    TriangleDetector detector = new TriangleDetector(width);
+    public ColorSensor color;
+    public DistanceSensor dist;
+
+    DcMotor arm, leftFront, leftBack, rightFront, rightBack;
+    int zeropos = arm.getCurrentPosition();
+
+    Servo clawServo;
+    Servo armservo;
+
 
     static final double FEET_PER_METER = 3.28084;
 
@@ -69,6 +89,15 @@ public class SampleAuto extends LinearOpMode
     public void runOpMode()
     {
         robot = new Brobot(hardwareMap);
+        Pose2d startPose = new Pose2d(0,0,Math.toRadians(90));
+        robot.setPoseEstimate(startPose);
+
+        TrajectorySequence trajSeq = robot.trajectorySequenceBuilder(startPose)
+                .forward(2)
+                .strafeLeft(24)
+                .forward(51)
+                .turn(Math.toRadians(-90))
+                .build();
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam Right"), cameraMonitorViewId);
@@ -173,6 +202,40 @@ public class SampleAuto extends LinearOpMode
         }
 
         /* Actually do something useful */
+        robot.followTrajectorySequence(trajSeq);
+        armHeight(800);
+        // Remember to change the camera rotation
+        camera.startStreaming(width, height, OpenCvCameraRotation.UPRIGHT);
+
+        while ((detector.getRightX() - detector.getLeftX()) < 180) {
+            camera.setPipeline(detector);
+            telemetry.addData("Left X", detector.getLeftX());
+            telemetry.addData("Right X", detector.getRightX());
+            telemetry.addData("Location of Object", detector.getLocation());
+            telemetry.update();
+            if (detector.getLocation() == TriangleDetector.ConeLocation.CENTER) {
+                leftFront.setPower(-0.20);
+                rightFront.setPower(0.20);
+                leftBack.setPower(-0.20);
+                rightBack.setPower(0.20);
+            } else if (detector.getLocation() == TriangleDetector.ConeLocation.LEFT) {
+                leftFront.setPower(0.25);
+                rightFront.setPower(0.30);
+                leftBack.setPower(-0.25);
+                rightBack.setPower(-0.30);
+            } else if (detector.getLocation() == TriangleDetector.ConeLocation.RIGHT) {
+                leftFront.setPower(-0.30);
+                rightFront.setPower(-0.25);
+                leftBack.setPower(0.30);
+                rightBack.setPower(0.25);
+            }
+        }
+        leftFront.setPower(0);
+        rightFront.setPower(0);
+        leftBack.setPower(0);
+        rightBack.setPower(0);
+
+        armHeight(1000);
 
         if(tagOfInterest == null || tagOfInterest.id == LEFT)
         {
@@ -216,6 +279,20 @@ public class SampleAuto extends LinearOpMode
     void rightPark()
     {
 
+    }
+
+    public void armHeight(int num)
+    {
+        arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        arm.setTargetPosition(num);
+        arm.setPower(1);
+        arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        while (arm.isBusy()) {
+
+        }
+
+        arm.setPower(0.2);
     }
 
     void sleepSec(int seconds)

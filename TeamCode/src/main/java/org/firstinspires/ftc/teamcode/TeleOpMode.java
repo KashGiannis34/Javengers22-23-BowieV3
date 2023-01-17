@@ -24,13 +24,28 @@ public class TeleOpMode extends LinearOpMode {
     // declare joystick position variables
     double X1; double Y1; double X2; double Y2;
 
-    public int zeropos;
+    final double rpm = 1150/28.0;
+    final double ppr = 145.1*28;
+    boolean release = false;
 
     // operational constants
     double joyScale = 0.6;
     double motorMax = 0.6; // Limit motor power to this value for Andymark RUN_USING_ENCODER mode
-    public DcMotor lf, rf, lr, rr, arm;
-    public Servo armServo, turnTable, claw;
+    public DcMotor lf, rf, lr, rr, arm, carousel;
+    public Servo claw, slideServo;
+
+    public enum Height
+    {
+        NONE,
+        GROUND,
+        LOW,
+        MEDIUM,
+        HIGH,
+        STACK
+    }
+
+    Height level = Height.NONE;
+
     @Override
     public void runOpMode() throws InterruptedException {
         lf = hardwareMap.dcMotor.get("leftFront");
@@ -40,9 +55,12 @@ public class TeleOpMode extends LinearOpMode {
         lf.setDirection(DcMotorSimple.Direction.REVERSE);
         lr.setDirection(DcMotorSimple.Direction.REVERSE);
 
+        carousel = hardwareMap.dcMotor.get("turnTable");
+        carousel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
         arm = hardwareMap.dcMotor.get("armMotor");
-        armServo = hardwareMap.servo.get("armServo");
         claw = hardwareMap.servo.get("clawServo");
+        slideServo = hardwareMap.servo.get("slideServo");
 
         List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
 
@@ -64,22 +82,37 @@ public class TeleOpMode extends LinearOpMode {
 
         double start = runtime.milliseconds();
         while (runtime.milliseconds() - start < 300)
-            arm.setPower(-0.5);
+            arm.setPower(-0.2);
 
         arm.setPower(0);
-        zeropos = arm.getCurrentPosition();
+        sleep(10);
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
 
-            telemetry.update();
-
             drive();
+            ground();
             low();
             medium();
             high();
             release();
             clawMove();
+            stack();
+            setSlideServo();
+            setTurnTable();
+            telemetry.addData("arm pos: ", arm.getCurrentPosition());
+            telemetry.addData("level: ", level);
+            telemetry.addData("slide servo: ", slideServo.getPosition());
+            if (arm.getCurrentPosition() <= 1000)
+            {
+                telemetry.addLine("arm not high enough");
+            }
+            else
+            {
+                telemetry.addLine("arm high enough");
+            }
+            telemetry.update();
+
         }
 
     }
@@ -131,16 +164,32 @@ public class TeleOpMode extends LinearOpMode {
         rr.setPower(RR);
     }
 
-    public void low()
+    public void ground()
     {
         if (gamepad2.dpad_down) {
-            armServo.setPosition(0.1);
-            if (arm.getCurrentPosition() > 1000) {
-                arm.setTargetPosition(1000);
+            level = Height.GROUND;
+            if (arm.getCurrentPosition() > 100) {
+                arm.setTargetPosition(100);
                 arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 arm.setPower(-1);
             } else {
-                arm.setTargetPosition(1000);
+                arm.setTargetPosition(100);
+                arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                arm.setPower(1);
+            }
+        }
+    }
+
+    public void low()
+    {
+        if (gamepad2.dpad_left) {
+            level = Height.LOW;
+            if (arm.getCurrentPosition() > 1250) {
+                arm.setTargetPosition(1250);
+                arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                arm.setPower(-1);
+            } else {
+                arm.setTargetPosition(1250);
                 arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 arm.setPower(1);
             }
@@ -149,14 +198,14 @@ public class TeleOpMode extends LinearOpMode {
 
     public void medium()
     {
-        if (gamepad2.dpad_left) {
-            armServo.setPosition(0.1);
-            if (arm.getCurrentPosition() > 1700) {
-                arm.setTargetPosition(1700);
+        if (gamepad2.dpad_up) {
+            level = Height.MEDIUM;
+            if (arm.getCurrentPosition() > 2100) {
+                arm.setTargetPosition(2100);
                 arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 arm.setPower(-1);
             } else {
-                arm.setTargetPosition(1700);
+                arm.setTargetPosition(2100);
                 arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 arm.setPower(1);
             }
@@ -165,14 +214,14 @@ public class TeleOpMode extends LinearOpMode {
 
     public void high()
     {
-        if (gamepad2.dpad_up) {
-            armServo.setPosition(1);
-            if (arm.getCurrentPosition() > 1700) {
-                arm.setTargetPosition(1700);
+        if (gamepad2.dpad_right) {
+            level = Height.HIGH;
+            if (arm.getCurrentPosition() > 2900) {
+                arm.setTargetPosition(2900);
                 arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 arm.setPower(-1);
             } else {
-                arm.setTargetPosition(1700);
+                arm.setTargetPosition(2900);
                 arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 arm.setPower(1);
             }
@@ -182,26 +231,130 @@ public class TeleOpMode extends LinearOpMode {
     public void clawMove()
     {
         if (gamepad1.a) {
-            claw.setPosition(0.6);
+            claw.setPosition(0.15);
+            if (level == Height.GROUND) {
+                arm.setPower(0);
+                level = Height.NONE;
+            }
         }
         if (gamepad1.y) {
             claw.setPosition(1.0);
+            if (level == Height.NONE) {
+                level = Height.GROUND;
+                if (arm.getCurrentPosition() > 100) {
+                    arm.setTargetPosition(100);
+                    arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    arm.setPower(-1);
+                } else {
+                    arm.setTargetPosition(100);
+                    arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    arm.setPower(1);
+                }
+            }
         }
     }
 
     public void release()
     {
         if (gamepad2.left_bumper || gamepad2.right_bumper) {
-            armServo.setPosition(0.1);
-            if (arm.getCurrentPosition() > zeropos+10) {
-                arm.setTargetPosition(zeropos+10);
+            arm.setPower(0);
+        }
+    }
+
+    public void stack()
+    {
+        if (gamepad2.y) {
+            level = Height.STACK;
+            if (arm.getCurrentPosition() > 380) {
+                arm.setTargetPosition(380);
                 arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                arm.setPower(-1);
+                arm.setPower(-0.7);
             } else {
-                arm.setTargetPosition(zeropos+10);
+                arm.setTargetPosition(380);
                 arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                arm.setPower(1);
+                arm.setPower(0.7);
             }
+        }
+
+        if (gamepad2.b) {
+            level = Height.STACK;
+            if (arm.getCurrentPosition() > 288) {
+                arm.setTargetPosition(288);
+                arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                arm.setPower(-0.7);
+            } else {
+                arm.setTargetPosition(288);
+                arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                arm.setPower(0.7);
+            }
+        }
+
+        if (gamepad2.a) {
+            level = Height.STACK;
+            if (arm.getCurrentPosition() > 195) {
+                arm.setTargetPosition(195);
+                arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                arm.setPower(-0.7);
+            } else {
+                arm.setTargetPosition(195);
+                arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                arm.setPower(0.7);
+            }
+        }
+
+        if (gamepad2.x) {
+            level = Height.STACK;
+            if (arm.getCurrentPosition() > 103) {
+                arm.setTargetPosition(103);
+                arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                arm.setPower(-0.7);
+            } else {
+                arm.setTargetPosition(103);
+                arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                arm.setPower(0.7);
+            }
+        }
+    }
+
+    public void setAngle(int angle)
+    {
+        int pos = (int)(ppr*angle/360.0);
+        if (carousel.getCurrentPosition() > pos) {
+            carousel.setTargetPosition(pos);
+            carousel.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            carousel.setPower(-0.7);
+        } else {
+            carousel.setTargetPosition(pos);
+            carousel.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            carousel.setPower(0.7);
+        }
+    }
+
+    public void setTurnTable()
+    {
+        if (gamepad1.dpad_left && arm.getCurrentPosition() > 1000)
+        {
+            setAngle(-90);
+        }
+        if (gamepad1.dpad_right && arm.getCurrentPosition() > 1000)
+        {
+            setAngle(90);
+        }
+        if (gamepad1.dpad_up && arm.getCurrentPosition() > 1000)
+        {
+            setAngle(0);
+        }
+    }
+
+    public void setSlideServo()
+    {
+        if (gamepad1.x)
+        {
+            slideServo.setPosition(0);
+        }
+        if (gamepad1.b)
+        {
+            slideServo.setPosition(1);
         }
     }
 
