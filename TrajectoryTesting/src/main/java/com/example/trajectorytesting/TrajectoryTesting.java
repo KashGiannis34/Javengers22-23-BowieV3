@@ -16,7 +16,9 @@ public class TrajectoryTesting {
                 .followTrajectorySequence(drive ->
                         drive.trajectorySequenceBuilder(new Pose2d(36,-66,Math.toRadians(90)))
                                 .splineTo(new Vector2d(60, -54), Math.toRadians(90))
-                                .splineToSplineHeading(new Pose2d(60,-12, Math.toRadians(0)), Math.toRadians(90))
+                                .splineTo(new Vector2d(60, -22), Math.toRadians(90))
+                                .splineTo(new Vector2d(46,-14), Math.toRadians(-90))
+                                .lineToLinearHeading(new Pose2d(54,-14.5, Math.toRadians(0)))
 //                                .splineTo(new Vector2d(60, -54), Math.toRadians(90))
 //                                .splineTo(new Vector2d(60,-12), Math.toRadians(90))
 //                                .turn(Math.toRadians(-90))

@@ -10,6 +10,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+
 import java.util.List;
 
 
@@ -61,6 +63,7 @@ public class TeleOpMode extends LinearOpMode {
         arm = hardwareMap.dcMotor.get("armMotor");
         claw = hardwareMap.servo.get("clawServo");
         slideServo = hardwareMap.servo.get("slideServo");
+        slideServo.setPosition(0.1);
 
         List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
 
@@ -103,6 +106,7 @@ public class TeleOpMode extends LinearOpMode {
             telemetry.addData("arm pos: ", arm.getCurrentPosition());
             telemetry.addData("level: ", level);
             telemetry.addData("slide servo: ", slideServo.getPosition());
+            telemetry.addData("leftFront power: ", lf.getPower());
             if (arm.getCurrentPosition() <= 1000)
             {
                 telemetry.addLine("arm not high enough");
@@ -231,7 +235,7 @@ public class TeleOpMode extends LinearOpMode {
     public void clawMove()
     {
         if (gamepad1.a) {
-            claw.setPosition(0.15);
+            claw.setPosition(0.19);
             if (level == Height.GROUND) {
                 arm.setPower(0);
                 level = Height.NONE;
@@ -241,12 +245,12 @@ public class TeleOpMode extends LinearOpMode {
             claw.setPosition(1.0);
             if (level == Height.NONE) {
                 level = Height.GROUND;
-                if (arm.getCurrentPosition() > 100) {
-                    arm.setTargetPosition(100);
+                if (arm.getCurrentPosition() > 30) {
+                    arm.setTargetPosition(30);
                     arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     arm.setPower(-1);
                 } else {
-                    arm.setTargetPosition(100);
+                    arm.setTargetPosition(30);
                     arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     arm.setPower(1);
                 }

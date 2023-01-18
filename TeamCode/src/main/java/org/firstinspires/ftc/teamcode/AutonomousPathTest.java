@@ -65,33 +65,33 @@ public class AutonomousPathTest extends LinearOpMode {
 //        robot.followTrajectorySequence(trajSeq);
         sleep(100);
         raiseHeight(1250);
+        setAngle(1263);
         sleep(700);
-        setAngle(112);
-//        sleep(700);
-//        slideServo.setPosition(0.7);
-//        sleep(700);
-//        claw.setPosition(0.15);
-//        sleep(700);
-//        setAngle(0);
-//        sleep(700);
-//
-//        int[] stackHeights = {440, 333, 225, 118, 10};
-//        for (int n = 0; n < 1/*stackHeights.length*/; n++) {
-//            raiseHeight(stackHeights[n]);
-//            sleep(1400);
-//            slideServo.setPosition(0.81);
-//            sleep(300);
-//            claw.setPosition(1);
-//            sleep(700);
-//            raiseHeight(1250);
-//            sleep(700);
-//            setAngle(112);
-//            slideServo.setPosition(0.7);
-//            sleep(700);
-//            claw.setPosition(0.2);
-//            sleep(700);
-//        }
-//        setAngle(0);
+        slideServo.setPosition(0.67);
+        sleep(700);
+        claw.setPosition(0.2);
+        sleep(700);
+        setAngle(0);
+        sleep(700);
+
+        int[] stackHeights = {440, 333, 220, 90, 10};
+        for (int n = 0; n < stackHeights.length; n++) {
+            raiseHeight(stackHeights[n]);
+            sleep(500);
+            slideServo.setPosition(0.7);
+            sleep(300);
+            claw.setPosition(1);
+            sleep(700);
+            raiseHeight(1250);
+            setAngle(1263);
+            slideServo.setPosition(0.67);
+            sleep(1400);
+            claw.setPosition(0.2);
+            sleep(700);
+            setAngle(0);
+            sleep(700);
+        }
+        setAngle(0);
         Pose2d poseEstimate = robot.getPoseEstimate();
         while (opModeIsActive()) {
             telemetry.addData("red: ", color.red());
@@ -107,26 +107,27 @@ public class AutonomousPathTest extends LinearOpMode {
         while (!isStopRequested() && opModeIsActive()) ;
     }
 
-    void setAngle(int angle)
+    void setAngle(int pos)
     {
-        carousel.setTargetPosition(cZeroPos+(int)(ppr*angle/360.0));
-        if (carousel.getCurrentPosition() > cZeroPos+(int)(ppr*angle/360.0))
-            carousel.setPower(-1);
+        carousel.setTargetPosition(pos);
+        if (carousel.getCurrentPosition() > pos)
+            carousel.setPower(-0.5);
         else
-            carousel.setPower(1);
+            carousel.setPower(0.5);
         carousel.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
+        //sleep(100);
         while (carousel.isBusy()) {
 
         }
-        carousel.setPower(0);
+        //carousel.setPower(0);
     }
 
     void raiseHeight(int num)
     {
         slide.setTargetPosition(num+zeroPos);
         if (slide.getCurrentPosition() > num+zeroPos)
-            slide.setPower(-0.3);
+            slide.setPower(-0.4);
         else
             slide.setPower(1);
         slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -135,7 +136,7 @@ public class AutonomousPathTest extends LinearOpMode {
 
         }
 
-        slide.setPower(0.2);
+        // slide.setPower(0.2);
 
         //clawSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     }
