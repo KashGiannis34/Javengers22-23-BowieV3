@@ -59,8 +59,11 @@ public class TeleOpMode extends LinearOpMode {
 
         carousel = hardwareMap.dcMotor.get("turnTable");
         carousel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        carousel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         arm = hardwareMap.dcMotor.get("armMotor");
+        arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         claw = hardwareMap.servo.get("clawServo");
         slideServo = hardwareMap.servo.get("slideServo");
         slideServo.setPosition(0.1);
