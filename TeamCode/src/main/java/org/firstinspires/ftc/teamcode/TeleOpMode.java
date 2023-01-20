@@ -263,7 +263,7 @@ public class TeleOpMode extends LinearOpMode {
 
     public void release()
     {
-        if (gamepad2.left_bumper || gamepad2.right_bumper) {
+        if (gamepad2.left_bumper || gamepad2.right_bumper || gamepad1.left_bumper || gamepad1.right_bumper) {
             arm.setPower(0);
         }
     }

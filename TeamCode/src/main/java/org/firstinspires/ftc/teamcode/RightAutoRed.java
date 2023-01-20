@@ -21,8 +21,8 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 
 import java.util.ArrayList;
 
-@Autonomous (name = "Right Auto")
-public class RightAuto extends LinearOpMode {
+@Autonomous (name = "Right Auto Red")
+public class RightAutoRed extends LinearOpMode {
     Brobot robot;
     ColorSensor color;
     DcMotor slide;
@@ -35,6 +35,7 @@ public class RightAuto extends LinearOpMode {
     final double ppr = 145.1*28;
     int cZeroPos, zeroPos;
     final double extendedPos = 0.595;
+    final double turnAmount = 126;
 
     static final double FEET_PER_METER = 3.28084;
 
@@ -70,26 +71,26 @@ public class RightAuto extends LinearOpMode {
         robot.setPoseEstimate(startPose);
 
         TrajectorySequence trajSeq = robot.trajectorySequenceBuilder(startPose)
-                .splineTo(new Vector2d(58, -54), Math.toRadians(90))
+                .splineTo(new Vector2d(58.6, -54), Math.toRadians(90))
                 .splineTo(new Vector2d(56.5, -18), Math.toRadians(90))
                 .build();
         TrajectorySequence trajSeq2= robot.trajectorySequenceBuilder(trajSeq.end())
 //                .lineToLinearHeading(new Pose2d(53.6,-16.4, Math.toRadians(-125)))
                 .lineToLinearHeading(new Pose2d(56.2,-14.3, Math.toRadians(0)))
-                .turn(Math.toRadians(-125))
+                .turn(Math.toRadians(-1*turnAmount))
                 // 1 cone
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
                     raiseHeight(1250);
                 })
-                .UNSTABLE_addTemporalMarkerOffset(0.7,() -> {
+                .UNSTABLE_addTemporalMarkerOffset(0.1,() -> {
                     slideServo.setPosition(extendedPos);
                 })
-                .UNSTABLE_addTemporalMarkerOffset(1, () -> {
+                .UNSTABLE_addTemporalMarkerOffset(0.3, () -> {
                     claw.setPosition(0.2);
                 })
-                .waitSeconds(1.4)
+                .waitSeconds(0.7)
                 // 2 cone
-                .turn(Math.toRadians(125))
+                .turn(Math.toRadians(turnAmount))
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
                     raiseHeight(440);
                 })
@@ -100,13 +101,13 @@ public class RightAuto extends LinearOpMode {
                     raiseHeight(1250);
                 })
                 .waitSeconds(1)
-                .turn(Math.toRadians(-125))
+                .turn(Math.toRadians(-1*turnAmount))
                 .UNSTABLE_addTemporalMarkerOffset(0.3, () -> {
                     claw.setPosition(0.2);
                 })
                 .waitSeconds(0.8)
                 // 3 cone
-                .turn(Math.toRadians(125))
+                .turn(Math.toRadians(turnAmount))
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
                     raiseHeight(333);
                 })
@@ -121,7 +122,8 @@ public class RightAuto extends LinearOpMode {
                 .UNSTABLE_addTemporalMarkerOffset(0.3, () -> {
                     claw.setPosition(0.2);
                 })
-                .waitSeconds(0.9)
+                .waitSeconds(1.1)
+
 //                // 4 cone
 //                .turn(Math.toRadians(125))
 //                .UNSTABLE_addTemporalMarkerOffset(0, () -> {
@@ -201,11 +203,11 @@ public class RightAuto extends LinearOpMode {
                 .build();
 
         TrajectorySequence leftPark = robot.trajectorySequenceBuilder(trajSeq2.end())
-                .back(40)
+                .back(44)
                 .build();
 
         TrajectorySequence middlePark = robot.trajectorySequenceBuilder(trajSeq2.end())
-                .back(20)
+                .back(22)
                 .build();
 
         TrajectorySequence rightPark = robot.trajectorySequenceBuilder(trajSeq2.end())
