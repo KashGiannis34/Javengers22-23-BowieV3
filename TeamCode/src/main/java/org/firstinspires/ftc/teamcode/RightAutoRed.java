@@ -118,7 +118,7 @@ public class RightAutoRed extends LinearOpMode {
                     raiseHeight(1250);
                 })
                 .waitSeconds(1)
-                .turn(Math.toRadians(-125))
+                .turn(Math.toRadians(-1*turnAmount))
                 .UNSTABLE_addTemporalMarkerOffset(0.3, () -> {
                     claw.setPosition(0.2);
                 })

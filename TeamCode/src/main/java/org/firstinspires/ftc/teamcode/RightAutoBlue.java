@@ -21,8 +21,8 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 
 import java.util.ArrayList;
 
-@Autonomous (name = "Left Auto")
-public class LeftAuto extends LinearOpMode {
+@Autonomous (name = "Right Auto Blue")
+public class RightAutoBlue extends LinearOpMode {
     Brobot robot;
     ColorSensor color;
     DcMotor slide;
@@ -34,8 +34,8 @@ public class LeftAuto extends LinearOpMode {
     final double rpm = 1150/28.0;
     final double ppr = 145.1*28;
     int cZeroPos, zeroPos;
-    final double extendedPos = 0.58;
-    final double turnAmount = 125.3;
+    final double extendedPos = 0.595;
+    final double turnAmount = 128;
 
     static final double FEET_PER_METER = 3.28084;
 
@@ -67,17 +67,17 @@ public class LeftAuto extends LinearOpMode {
         claw = hardwareMap.servo.get("clawServo");
         slideServo = hardwareMap.servo.get("slideServo");
 
-        Pose2d startPose = new Pose2d(-30,-68,Math.toRadians(90));
+        Pose2d startPose = new Pose2d(40.25,-68.75,Math.toRadians(90));
         robot.setPoseEstimate(startPose);
 
         TrajectorySequence trajSeq = robot.trajectorySequenceBuilder(startPose)
-                .splineTo(new Vector2d(-58.6, -54), Math.toRadians(90))
-                .splineTo(new Vector2d(-56.5, -18), Math.toRadians(90))
+                .splineTo(new Vector2d(59, -54), Math.toRadians(90))
+                .splineTo(new Vector2d(56.5, -18), Math.toRadians(90))
                 .build();
         TrajectorySequence trajSeq2= robot.trajectorySequenceBuilder(trajSeq.end())
 //                .lineToLinearHeading(new Pose2d(53.6,-16.4, Math.toRadians(-125)))
-                .lineToLinearHeading(new Pose2d(-53.18,-14.3, Math.toRadians(180)))
-                .turn(Math.toRadians(turnAmount))
+                .lineToLinearHeading(new Pose2d(55.3,-15, Math.toRadians(0)))
+                .turn(Math.toRadians(-1*turnAmount))
                 // 1 cone
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
                     raiseHeight(1250);
@@ -90,7 +90,7 @@ public class LeftAuto extends LinearOpMode {
                 })
                 .waitSeconds(0.7)
                 // 2 cone
-                .turn(Math.toRadians(-1*turnAmount))
+                .turn(Math.toRadians(turnAmount))
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
                     raiseHeight(440);
                 })
@@ -101,13 +101,13 @@ public class LeftAuto extends LinearOpMode {
                     raiseHeight(1250);
                 })
                 .waitSeconds(1)
-                .turn(Math.toRadians(turnAmount))
+                .turn(Math.toRadians(-1*turnAmount))
                 .UNSTABLE_addTemporalMarkerOffset(0.3, () -> {
                     claw.setPosition(0.2);
                 })
                 .waitSeconds(0.8)
                 // 3 cone
-                .turn(Math.toRadians(-1*(turnAmount+3)))
+                .turn(Math.toRadians(130))
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
                     raiseHeight(333);
                 })
@@ -118,11 +118,11 @@ public class LeftAuto extends LinearOpMode {
                     raiseHeight(1250);
                 })
                 .waitSeconds(1)
-                .turn(Math.toRadians(turnAmount+9))
+                .turn(Math.toRadians(-130))
                 .UNSTABLE_addTemporalMarkerOffset(0.3, () -> {
                     claw.setPosition(0.2);
                 })
-                .waitSeconds(0.9)
+                .waitSeconds(1.1)
 
 //                // 4 cone
 //                .turn(Math.toRadians(125))
@@ -193,7 +193,7 @@ public class LeftAuto extends LinearOpMode {
 //                    claw.setPosition(0.2);
 //                })
 //                .waitSeconds(1.3)
-                .lineToLinearHeading(new Pose2d(-56.2,-18, Math.toRadians(180)))
+                .lineToLinearHeading(new Pose2d(56.2,-18, Math.toRadians(0)))
                 .UNSTABLE_addTemporalMarkerOffset(0.3, () -> {
                     slideServo.setPosition(0.1);
                     raiseHeight(10);
@@ -203,7 +203,7 @@ public class LeftAuto extends LinearOpMode {
                 .build();
 
         TrajectorySequence leftPark = robot.trajectorySequenceBuilder(trajSeq2.end())
-                .forward(4)
+                .back(44)
                 .build();
 
         TrajectorySequence middlePark = robot.trajectorySequenceBuilder(trajSeq2.end())
@@ -211,7 +211,7 @@ public class LeftAuto extends LinearOpMode {
                 .build();
 
         TrajectorySequence rightPark = robot.trajectorySequenceBuilder(trajSeq2.end())
-                .back(44)
+                .forward(4)
                 .build();
 
 //        TrajectorySequence trajSeq2= robot.trajectorySequenceBuilder(trajSeq.end())
