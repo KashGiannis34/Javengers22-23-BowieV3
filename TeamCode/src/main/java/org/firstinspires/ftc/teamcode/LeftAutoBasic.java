@@ -21,8 +21,8 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 
 import java.util.ArrayList;
 
-@Autonomous (name = "Right Auto Basic")
-public class RightAutoBasic extends LinearOpMode {
+@Autonomous (name = "Left Auto Basic")
+public class LeftAutoBasic extends LinearOpMode {
     Brobot robot;
     //ColorSensor color;
     DcMotor slide;
@@ -67,13 +67,13 @@ public class RightAutoBasic extends LinearOpMode {
         claw = hardwareMap.servo.get("clawServo");
         slideServo = hardwareMap.servo.get("slideServo");
 
-        Pose2d startPose = new Pose2d(40,-66,Math.toRadians(90));
+        Pose2d startPose = new Pose2d(-30,-66,Math.toRadians(90));
         robot.setPoseEstimate(startPose);
 
         TrajectorySequence trajSeq = robot.trajectorySequenceBuilder(startPose)
-                .splineToConstantHeading(new Vector2d(12, -58), Math.toRadians(90))
-                .splineTo(new Vector2d(12, -18), Math.toRadians(90))
-                .lineToConstantHeading(new Vector2d(24.15,-13))
+                .splineToConstantHeading(new Vector2d(-12, -58), Math.toRadians(90))
+                .splineTo(new Vector2d(-12, -18), Math.toRadians(90))
+                .lineToConstantHeading(new Vector2d(-24.35,-13))
                 .UNSTABLE_addTemporalMarkerOffset(1, () ->{
                     raiseHeight(2900);
                 })
@@ -90,19 +90,19 @@ public class RightAutoBasic extends LinearOpMode {
                     slide.setPower(0);
                 })
                 .waitSeconds(10)
-                .lineToConstantHeading(new Vector2d(24.15, -15))
-                .build();
-
-        TrajectorySequence leftPark = robot.trajectorySequenceBuilder(trajSeq.end())
-                .lineToConstantHeading(new Vector2d(8,-16))
-                .build();
-
-        TrajectorySequence middlePark = robot.trajectorySequenceBuilder(trajSeq.end())
-                .lineToConstantHeading(new Vector2d(36,-16))
+                .lineToConstantHeading(new Vector2d(-24.35, -15))
                 .build();
 
         TrajectorySequence rightPark = robot.trajectorySequenceBuilder(trajSeq.end())
-                .lineToConstantHeading(new Vector2d(60,-16))
+                .lineToConstantHeading(new Vector2d(-8,-16))
+                .build();
+
+        TrajectorySequence middlePark = robot.trajectorySequenceBuilder(trajSeq.end())
+                .lineToConstantHeading(new Vector2d(-36,-16))
+                .build();
+
+        TrajectorySequence leftPark = robot.trajectorySequenceBuilder(trajSeq.end())
+                .lineToConstantHeading(new Vector2d(-60,-16))
                 .build();
 
         rightDist = hardwareMap.get(DistanceSensor.class, "rightDistance");

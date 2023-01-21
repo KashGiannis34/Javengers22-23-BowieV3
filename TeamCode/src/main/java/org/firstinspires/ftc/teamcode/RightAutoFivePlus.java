@@ -4,7 +4,6 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -21,8 +20,8 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 
 import java.util.ArrayList;
 
-@Autonomous (name = "Right Auto Basic")
-public class RightAutoBasic extends LinearOpMode {
+@Autonomous (name = "Right Auto Five+")
+public class RightAutoFivePlus extends LinearOpMode {
     Brobot robot;
     //ColorSensor color;
     DcMotor slide;
@@ -73,24 +72,65 @@ public class RightAutoBasic extends LinearOpMode {
         TrajectorySequence trajSeq = robot.trajectorySequenceBuilder(startPose)
                 .splineToConstantHeading(new Vector2d(12, -58), Math.toRadians(90))
                 .splineTo(new Vector2d(12, -18), Math.toRadians(90))
-                .lineToConstantHeading(new Vector2d(24.15,-13))
-                .UNSTABLE_addTemporalMarkerOffset(1, () ->{
+                .splineToConstantHeading(new Vector2d(24.5,-13), Math.toRadians(90))
+                .UNSTABLE_addTemporalMarkerOffset(0.5, () ->{
                     raiseHeight(2900);
                 })
-                .UNSTABLE_addTemporalMarkerOffset(4, () -> {
+                .UNSTABLE_addTemporalMarkerOffset(2.1, () -> {
                     slideServo.setPosition(0.48);
                 })
-                .UNSTABLE_addTemporalMarkerOffset(5, () ->{
-                    claw.setPosition(0.2);
+                .UNSTABLE_addTemporalMarkerOffset(2.8, () ->{
+                    claw.setPosition(0);
                 })
-                .UNSTABLE_addTemporalMarkerOffset(7, () ->{
-                    slideServo.setPosition(0.1);
-                })
-                .UNSTABLE_addTemporalMarkerOffset(8, () ->{
+                .UNSTABLE_addTemporalMarkerOffset(3.5, () ->{
                     slide.setPower(0);
                 })
-                .waitSeconds(10)
-                .lineToConstantHeading(new Vector2d(24.15, -15))
+                .waitSeconds(3.8)
+                .lineToConstantHeading(new Vector2d(24.5, -16.65))
+                .lineToSplineHeading(new Pose2d(59,-16.65, Math.toRadians(0)))
+                .UNSTABLE_addTemporalMarkerOffset(0.2, () ->{
+                    raiseHeight(440);
+                })
+                .UNSTABLE_addTemporalMarkerOffset(0.6, () -> {
+                    slideServo.setPosition(0.48);
+                })
+                .UNSTABLE_addTemporalMarkerOffset(1.0, () ->{
+                    claw.setPosition(1);
+                })
+                .UNSTABLE_addTemporalMarkerOffset(1.5, () ->{
+                    raiseHeight(1250);
+                })
+                .waitSeconds(2.0)
+                .lineToSplineHeading(new Pose2d(46.7,-16.65, Math.toRadians(-90)))
+                .UNSTABLE_addTemporalMarkerOffset(0.3, () -> {
+                    claw.setPosition(0.2);
+                })
+                .UNSTABLE_addTemporalMarkerOffset(1, () -> {
+                    slideServo.setPosition(0.1);
+                    raiseHeight(345);
+                })
+                .waitSeconds(1.5)
+                .lineToSplineHeading(new Pose2d(59,-16.65, Math.toRadians(0)))
+                .UNSTABLE_addTemporalMarkerOffset(0.2, () -> {
+                    slideServo.setPosition(0.48);
+                })
+                .UNSTABLE_addTemporalMarkerOffset(0.6, () ->{
+                    claw.setPosition(1);
+                })
+                .UNSTABLE_addTemporalMarkerOffset(0.9, () ->{
+                    raiseHeight(1250);
+                })
+                .waitSeconds(1.3)
+                .lineToSplineHeading(new Pose2d(46.7,-16.65, Math.toRadians(-90)))
+                .UNSTABLE_addTemporalMarkerOffset(0.3, () -> {
+                    claw.setPosition(0.2);
+                })
+                .UNSTABLE_addTemporalMarkerOffset(1, () -> {
+                    slideServo.setPosition(0.1);
+                    raiseHeight(15);
+                    slide.setPower(0);
+                })
+                .waitSeconds(1.5)
                 .build();
 
         TrajectorySequence leftPark = robot.trajectorySequenceBuilder(trajSeq.end())

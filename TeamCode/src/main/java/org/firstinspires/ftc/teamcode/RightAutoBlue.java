@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -22,9 +23,10 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 import java.util.ArrayList;
 
 @Autonomous (name = "Right Auto Blue")
+@Disabled
 public class RightAutoBlue extends LinearOpMode {
     Brobot robot;
-    ColorSensor color;
+    //ColorSensor color;
     DcMotor slide;
     public DistanceSensor rightDist, leftDist;
     OpenCvCamera camera;
@@ -349,7 +351,7 @@ public class RightAutoBlue extends LinearOpMode {
 
         rightDist = hardwareMap.get(DistanceSensor.class, "rightDistance");
         leftDist = hardwareMap.get(DistanceSensor.class, "leftDistance");
-        color = hardwareMap.get(ColorSensor.class, "color");
+        //color = hardwareMap.get(ColorSensor.class, "color");
 
         slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
@@ -509,9 +511,9 @@ public class RightAutoBlue extends LinearOpMode {
 
         Pose2d poseEstimate = robot.getPoseEstimate();
         while (opModeIsActive()) {
-            telemetry.addData("red: ", color.red());
-            telemetry.addData("green: ", color.green());
-            telemetry.addData("blue: ", color.blue());
+            //telemetry.addData("red: ", color.red());
+            //telemetry.addData("green: ", color.green());
+            //telemetry.addData("blue: ", color.blue());
             telemetry.addData("Left Distance (cm): ", leftDist.getDistance(DistanceUnit.CM));
             telemetry.addData("Right Distance (cm): ", rightDist.getDistance(DistanceUnit.CM));
             telemetry.addData("time elapsed: ", etime.seconds());

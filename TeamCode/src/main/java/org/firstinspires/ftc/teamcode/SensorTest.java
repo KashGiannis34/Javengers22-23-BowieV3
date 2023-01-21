@@ -16,7 +16,7 @@ import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 @TeleOp (name = "Sensor Test")
 public class SensorTest extends LinearOpMode {
     Brobot robot;
-    ColorSensor color;
+    //ColorSensor color;
     DcMotor carousel;
     public DistanceSensor rightDist, leftDist;
     ElapsedTime etime = new ElapsedTime();
@@ -28,7 +28,7 @@ public class SensorTest extends LinearOpMode {
     {
         rightDist = hardwareMap.get(DistanceSensor.class, "rightDistance");
         leftDist = hardwareMap.get(DistanceSensor.class, "leftDistance");
-        color = hardwareMap.get(ColorSensor.class, "color");
+        //color = hardwareMap.get(ColorSensor.class, "color");
         robot = new Brobot(hardwareMap);
         carousel = hardwareMap.dcMotor.get("turnTable");
         carousel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -37,9 +37,9 @@ public class SensorTest extends LinearOpMode {
 
         while (opModeIsActive()) {
             Pose2d poseEstimate = robot.getPoseEstimate();
-            telemetry.addData("red: ", color.red());
-            telemetry.addData("green: ", color.green());
-            telemetry.addData("blue: ", color.blue());
+            //telemetry.addData("red: ", color.red());
+            //telemetry.addData("green: ", color.green());
+            //telemetry.addData("blue: ", color.blue());
             telemetry.addData("Left Distance (cm): ", leftDist.getDistance(DistanceUnit.CM));
             telemetry.addData("Right Distance (cm): ", rightDist.getDistance(DistanceUnit.CM));
             telemetry.addData("time elapsed: ", etime.seconds());

@@ -24,7 +24,7 @@ import java.util.ArrayList;
 @Autonomous (name = "Left Auto")
 public class LeftAuto extends LinearOpMode {
     Brobot robot;
-    ColorSensor color;
+    //ColorSensor color;
     DcMotor slide;
     public DistanceSensor rightDist, leftDist;
     OpenCvCamera camera;
@@ -34,7 +34,7 @@ public class LeftAuto extends LinearOpMode {
     final double rpm = 1150/28.0;
     final double ppr = 145.1*28;
     int cZeroPos, zeroPos;
-    final double extendedPos = 0.58;
+    final double extendedPos = 0.577;
     final double turnAmount = 125.3;
 
     static final double FEET_PER_METER = 3.28084;
@@ -76,7 +76,7 @@ public class LeftAuto extends LinearOpMode {
                 .build();
         TrajectorySequence trajSeq2= robot.trajectorySequenceBuilder(trajSeq.end())
 //                .lineToLinearHeading(new Pose2d(53.6,-16.4, Math.toRadians(-125)))
-                .lineToLinearHeading(new Pose2d(-53.18,-14.3, Math.toRadians(180)))
+                .lineToLinearHeading(new Pose2d(-53.28,-14.3, Math.toRadians(180)))
                 .turn(Math.toRadians(turnAmount))
                 // 1 cone
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
@@ -107,7 +107,7 @@ public class LeftAuto extends LinearOpMode {
                 })
                 .waitSeconds(0.8)
                 // 3 cone
-                .turn(Math.toRadians(-1*(turnAmount+3)))
+                .turn(Math.toRadians(-1*turnAmount))
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
                     raiseHeight(333);
                 })
@@ -118,7 +118,7 @@ public class LeftAuto extends LinearOpMode {
                     raiseHeight(1250);
                 })
                 .waitSeconds(1)
-                .turn(Math.toRadians(turnAmount+9))
+                .turn(Math.toRadians(turnAmount))
                 .UNSTABLE_addTemporalMarkerOffset(0.3, () -> {
                     claw.setPosition(0.2);
                 })
@@ -214,142 +214,10 @@ public class LeftAuto extends LinearOpMode {
                 .back(44)
                 .build();
 
-//        TrajectorySequence trajSeq2= robot.trajectorySequenceBuilder(trajSeq.end())
-//                .lineToLinearHeading(new Pose2d(53.6,-16.4, Math.toRadians(-125)))
-////                .turn(Math.toRadians(-125))
-//
-//                // 1 cone
-//                .UNSTABLE_addTemporalMarkerOffset(0, () -> {
-//                    raiseHeight(1250);
-//                })
-//                .UNSTABLE_addTemporalMarkerOffset(0.4,() -> {
-//                    slideServo.setPosition(extendedPos);
-//                })
-//                .UNSTABLE_addTemporalMarkerOffset(0.8, () -> {
-//                    claw.setPosition(0.2);
-//                })
-//                .waitSeconds(1.3)
-//                // 2 cone
-//                .turn(Math.toRadians(125))
-//                .UNSTABLE_addTemporalMarkerOffset(0, () -> {
-//                    raiseHeight(440);
-//                })
-//                .UNSTABLE_addTemporalMarkerOffset(0.5, () -> {
-//                    slideServo.setPosition(extendedPos);
-//                })
-//                .UNSTABLE_addTemporalMarkerOffset(0.8, () -> {
-//                    claw.setPosition(1);
-//                })
-//                .UNSTABLE_addTemporalMarkerOffset(1, () -> {
-//                    raiseHeight(1250);
-//                })
-//                .waitSeconds(1.3)
-//                .turn(Math.toRadians(-125))
-//                .UNSTABLE_addTemporalMarkerOffset(0,() -> {
-//                    slideServo.setPosition(extendedPos);
-//                })
-//                .UNSTABLE_addTemporalMarkerOffset(0.8, () -> {
-//                    claw.setPosition(0.2);
-//                })
-//                .waitSeconds(1.3)
-//                // 3 cone
-//                .turn(Math.toRadians(125))
-//                .UNSTABLE_addTemporalMarkerOffset(0, () -> {
-//                    raiseHeight(333);
-//                })
-//                .UNSTABLE_addTemporalMarkerOffset(0.5, () -> {
-//                    slideServo.setPosition(extendedPos);
-//                })
-//                .UNSTABLE_addTemporalMarkerOffset(0.8, () -> {
-//                    claw.setPosition(1);
-//                })
-//                .UNSTABLE_addTemporalMarkerOffset(1, () -> {
-//                    raiseHeight(1250);
-//                })
-//                .waitSeconds(1.3)
-//                .turn(Math.toRadians(-125))
-//                .UNSTABLE_addTemporalMarkerOffset(0,() -> {
-//                    slideServo.setPosition(extendedPos);
-//                })
-//                .UNSTABLE_addTemporalMarkerOffset(0.8, () -> {
-//                    claw.setPosition(0.2);
-//                })
-//                .waitSeconds(1.3)
-//                // 4 cone
-//                .turn(Math.toRadians(125))
-//                .UNSTABLE_addTemporalMarkerOffset(0, () -> {
-//                    raiseHeight(220);
-//                })
-//                .UNSTABLE_addTemporalMarkerOffset(0.5, () -> {
-//                    slideServo.setPosition(extendedPos);
-//                })
-//                .UNSTABLE_addTemporalMarkerOffset(0.8, () -> {
-//                    claw.setPosition(1);
-//                })
-//                .UNSTABLE_addTemporalMarkerOffset(1, () -> {
-//                    raiseHeight(1250);
-//                })
-//                .waitSeconds(1.3)
-//                .turn(Math.toRadians(-125))
-//                .UNSTABLE_addTemporalMarkerOffset(0,() -> {
-//                    slideServo.setPosition(extendedPos);
-//                })
-//                .UNSTABLE_addTemporalMarkerOffset(0.8, () -> {
-//                    claw.setPosition(0.2);
-//                })
-//                .waitSeconds(1.3)
-//                // 5 cone
-//                .turn(Math.toRadians(125))
-//                .UNSTABLE_addTemporalMarkerOffset(0, () -> {
-//                    raiseHeight(90);
-//                })
-//                .UNSTABLE_addTemporalMarkerOffset(0.5, () -> {
-//                    slideServo.setPosition(extendedPos);
-//                })
-//                .UNSTABLE_addTemporalMarkerOffset(0.8, () -> {
-//                    claw.setPosition(1);
-//                })
-//                .UNSTABLE_addTemporalMarkerOffset(1, () -> {
-//                    raiseHeight(1250);
-//                })
-//                .waitSeconds(1.3)
-//                .turn(Math.toRadians(-125))
-//                .UNSTABLE_addTemporalMarkerOffset(0,() -> {
-//                    slideServo.setPosition(extendedPos);
-//                })
-//                .UNSTABLE_addTemporalMarkerOffset(0.8, () -> {
-//                    claw.setPosition(0.2);
-//                })
-//                .waitSeconds(1.3)
-//                // 6 cone
-//                .turn(Math.toRadians(125))
-//                .UNSTABLE_addTemporalMarkerOffset(0, () -> {
-//                    raiseHeight(10);
-//                })
-//                .UNSTABLE_addTemporalMarkerOffset(0.5, () -> {
-//                    slideServo.setPosition(extendedPos);
-//                })
-//                .UNSTABLE_addTemporalMarkerOffset(0.8, () -> {
-//                    claw.setPosition(1);
-//                })
-//                .UNSTABLE_addTemporalMarkerOffset(1, () -> {
-//                    raiseHeight(1250);
-//                })
-//                .waitSeconds(1.3)
-//                .turn(Math.toRadians(-125))
-//                .UNSTABLE_addTemporalMarkerOffset(0,() -> {
-//                    slideServo.setPosition(extendedPos);
-//                })
-//                .UNSTABLE_addTemporalMarkerOffset(0.8, () -> {
-//                    claw.setPosition(0.2);
-//                })
-//                .waitSeconds(1.3)
-//                .turn(Math.toRadians(125))
-//                .build();
 
         rightDist = hardwareMap.get(DistanceSensor.class, "rightDistance");
         leftDist = hardwareMap.get(DistanceSensor.class, "leftDistance");
-        color = hardwareMap.get(ColorSensor.class, "color");
+        //color = hardwareMap.get(ColorSensor.class, "color");
 
         slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
@@ -509,9 +377,9 @@ public class LeftAuto extends LinearOpMode {
 
         Pose2d poseEstimate = robot.getPoseEstimate();
         while (opModeIsActive()) {
-            telemetry.addData("red: ", color.red());
-            telemetry.addData("green: ", color.green());
-            telemetry.addData("blue: ", color.blue());
+            //telemetry.addData("red: ", color.red());
+            //telemetry.addData("green: ", color.green());
+            //telemetry.addData("blue: ", color.blue());
             telemetry.addData("Left Distance (cm): ", leftDist.getDistance(DistanceUnit.CM));
             telemetry.addData("Right Distance (cm): ", rightDist.getDistance(DistanceUnit.CM));
             telemetry.addData("time elapsed: ", etime.seconds());

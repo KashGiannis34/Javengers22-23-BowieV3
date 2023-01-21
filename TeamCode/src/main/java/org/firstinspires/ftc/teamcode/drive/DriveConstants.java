@@ -9,7 +9,6 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 // TO FINETUNE THESE CONSTANTS AGAIN FOR A MORE ACCURATE AUTONOMOUS - AKASH
 @Config
 public class DriveConstants {
-
     /*
      * These are motor constants that should be listed online for your motors.
      */
