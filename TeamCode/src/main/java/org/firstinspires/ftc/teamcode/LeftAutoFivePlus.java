@@ -83,6 +83,7 @@ public class LeftAutoFivePlus extends LinearOpMode {
                     claw.setPosition(0);
                 })
                 .UNSTABLE_addTemporalMarkerOffset(3.5, () ->{
+                    slideServo.setPosition(0.1);
                     slide.setPower(0);
                 })
                 .waitSeconds(3.8)

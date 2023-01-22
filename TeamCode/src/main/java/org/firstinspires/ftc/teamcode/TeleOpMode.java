@@ -36,6 +36,9 @@ public class TeleOpMode extends LinearOpMode {
     public DcMotor lf, rf, lr, rr, arm, carousel;
     public Servo claw, slideServo;
 
+    final double OPEN = 0.19;
+    final double CLOSE = 1.00;
+
     public enum Height
     {
         NONE,
@@ -238,14 +241,14 @@ public class TeleOpMode extends LinearOpMode {
     public void clawMove()
     {
         if (gamepad1.a) {
-            claw.setPosition(0.19);
+            claw.setPosition(OPEN);
             if (level == Height.GROUND) {
                 arm.setPower(0);
                 level = Height.NONE;
             }
         }
         if (gamepad1.y) {
-            claw.setPosition(1.0);
+            claw.setPosition(CLOSE);
             if (level == Height.NONE) {
                 level = Height.GROUND;
                 if (arm.getCurrentPosition() > 30) {
@@ -263,8 +266,23 @@ public class TeleOpMode extends LinearOpMode {
 
     public void release()
     {
-        if (gamepad2.left_bumper || gamepad2.right_bumper || gamepad1.left_bumper || gamepad1.right_bumper) {
+        if (gamepad2.left_bumper || gamepad2.right_bumper) {
             arm.setPower(0);
+            level = Height.NONE;
+        }
+
+        if (gamepad1.left_bumper || gamepad1.right_bumper)
+        {
+            level = Height.NONE;
+            if (arm.getCurrentPosition() > 10) {
+                arm.setTargetPosition(10);
+                arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                arm.setPower(-1);
+            } else {
+                arm.setTargetPosition(10);
+                arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                arm.setPower(1);
+            }
         }
     }
 
