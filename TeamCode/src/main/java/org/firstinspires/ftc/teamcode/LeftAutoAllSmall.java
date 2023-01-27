@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
@@ -20,8 +21,9 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 
 import java.util.ArrayList;
 
-@Autonomous (name = "Left Auto Five+")
-public class LeftAutoFivePlus extends LinearOpMode {
+@Autonomous (name = "Left Auto All Small")
+@Disabled
+public class LeftAutoAllSmall extends LinearOpMode {
     Brobot robot;
     //ColorSensor color;
     DcMotor slide;
@@ -72,9 +74,10 @@ public class LeftAutoFivePlus extends LinearOpMode {
         TrajectorySequence trajSeq = robot.trajectorySequenceBuilder(startPose)
                 .splineToConstantHeading(new Vector2d(-10, -55), Math.toRadians(90))
                 .splineToConstantHeading(new Vector2d(-10, -18), Math.toRadians(90))
-                .splineToConstantHeading(new Vector2d(-25.2,-13.4), Math.toRadians(90))
+                .splineToConstantHeading(new Vector2d(-25.2,-18), Math.toRadians(90))
+                .lineToSplineHeading(new Pose2d(-47.5,-17.8, Math.toRadians(270)))
                 .UNSTABLE_addTemporalMarkerOffset(0.5, () ->{
-                    raiseHeight(2900);
+                    raiseHeight(1250);
                 })
                 .UNSTABLE_addTemporalMarkerOffset(2.1, () -> {
                     slideServo.setPosition(0.48);
@@ -87,8 +90,8 @@ public class LeftAutoFivePlus extends LinearOpMode {
                     slide.setPower(0);
                 })
                 .waitSeconds(3.8)
-                .lineToConstantHeading(new Vector2d(-25.2, -16.5))
-                .lineToSplineHeading(new Pose2d(-60.25,-16.5, Math.toRadians(180)))
+                .lineToSplineHeading(new Pose2d(-47.5,-16.5, Math.toRadians(180)))
+                .lineToConstantHeading(new Vector2d(-60.25,-16.5))
                 .UNSTABLE_addTemporalMarkerOffset(0.2, () ->{
                     raiseHeight(440);
                 })

@@ -178,15 +178,7 @@ public class TeleOpMode extends LinearOpMode {
     {
         if (gamepad2.dpad_down) {
             level = Height.GROUND;
-            if (arm.getCurrentPosition() > 100) {
-                arm.setTargetPosition(100);
-                arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                arm.setPower(-1);
-            } else {
-                arm.setTargetPosition(100);
-                arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                arm.setPower(1);
-            }
+            raiseHeight(100);
         }
     }
 
@@ -194,15 +186,7 @@ public class TeleOpMode extends LinearOpMode {
     {
         if (gamepad2.dpad_left) {
             level = Height.LOW;
-            if (arm.getCurrentPosition() > 1250) {
-                arm.setTargetPosition(1250);
-                arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                arm.setPower(-1);
-            } else {
-                arm.setTargetPosition(1250);
-                arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                arm.setPower(1);
-            }
+            raiseHeight(1250);
         }
     }
 
@@ -210,15 +194,7 @@ public class TeleOpMode extends LinearOpMode {
     {
         if (gamepad2.dpad_up) {
             level = Height.MEDIUM;
-            if (arm.getCurrentPosition() > 2100) {
-                arm.setTargetPosition(2100);
-                arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                arm.setPower(-1);
-            } else {
-                arm.setTargetPosition(2100);
-                arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                arm.setPower(1);
-            }
+            raiseHeight(2100);
         }
     }
 
@@ -226,15 +202,7 @@ public class TeleOpMode extends LinearOpMode {
     {
         if (gamepad2.dpad_right) {
             level = Height.HIGH;
-            if (arm.getCurrentPosition() > 2900) {
-                arm.setTargetPosition(2900);
-                arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                arm.setPower(-1);
-            } else {
-                arm.setTargetPosition(2900);
-                arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                arm.setPower(1);
-            }
+            raiseHeight(2900);
         }
     }
 
@@ -251,15 +219,7 @@ public class TeleOpMode extends LinearOpMode {
             claw.setPosition(CLOSE);
             if (level == Height.NONE) {
                 level = Height.GROUND;
-                if (arm.getCurrentPosition() > 30) {
-                    arm.setTargetPosition(30);
-                    arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    arm.setPower(-1);
-                } else {
-                    arm.setTargetPosition(30);
-                    arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    arm.setPower(1);
-                }
+                raiseHeight(30);
             }
         }
     }
@@ -274,15 +234,7 @@ public class TeleOpMode extends LinearOpMode {
         if (gamepad1.left_bumper || gamepad1.right_bumper)
         {
             level = Height.NONE;
-            if (arm.getCurrentPosition() > 10) {
-                arm.setTargetPosition(10);
-                arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                arm.setPower(-1);
-            } else {
-                arm.setTargetPosition(10);
-                arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                arm.setPower(1);
-            }
+            raiseHeight(10);
         }
     }
 
@@ -290,54 +242,22 @@ public class TeleOpMode extends LinearOpMode {
     {
         if (gamepad2.y) {
             level = Height.STACK;
-            if (arm.getCurrentPosition() > 380) {
-                arm.setTargetPosition(380);
-                arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                arm.setPower(-0.7);
-            } else {
-                arm.setTargetPosition(380);
-                arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                arm.setPower(0.7);
-            }
+            raiseHeight(380);
         }
 
         if (gamepad2.b) {
             level = Height.STACK;
-            if (arm.getCurrentPosition() > 288) {
-                arm.setTargetPosition(288);
-                arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                arm.setPower(-0.7);
-            } else {
-                arm.setTargetPosition(288);
-                arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                arm.setPower(0.7);
-            }
+            raiseHeight(288);
         }
 
         if (gamepad2.a) {
             level = Height.STACK;
-            if (arm.getCurrentPosition() > 195) {
-                arm.setTargetPosition(195);
-                arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                arm.setPower(-0.7);
-            } else {
-                arm.setTargetPosition(195);
-                arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                arm.setPower(0.7);
-            }
+            raiseHeight(195);
         }
 
         if (gamepad2.x) {
             level = Height.STACK;
-            if (arm.getCurrentPosition() > 103) {
-                arm.setTargetPosition(103);
-                arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                arm.setPower(-0.7);
-            } else {
-                arm.setTargetPosition(103);
-                arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                arm.setPower(0.7);
-            }
+            raiseHeight(103);
         }
     }
 
@@ -380,6 +300,19 @@ public class TeleOpMode extends LinearOpMode {
         if (gamepad1.b)
         {
             slideServo.setPosition(1);
+        }
+    }
+
+    public void raiseHeight(int height)
+    {
+        if (arm.getCurrentPosition() > height) {
+            arm.setTargetPosition(height);
+            arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            arm.setPower(-1);
+        } else {
+            arm.setTargetPosition(height);
+            arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            arm.setPower(1);
         }
     }
 

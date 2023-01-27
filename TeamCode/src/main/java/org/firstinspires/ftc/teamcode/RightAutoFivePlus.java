@@ -72,7 +72,7 @@ public class RightAutoFivePlus extends LinearOpMode {
         TrajectorySequence trajSeq = robot.trajectorySequenceBuilder(startPose)
                 .splineToConstantHeading(new Vector2d(12, -58), Math.toRadians(90))
                 .splineTo(new Vector2d(12, -18), Math.toRadians(90))
-                .splineToConstantHeading(new Vector2d(24.5,-14.75), Math.toRadians(90))
+                .splineToConstantHeading(new Vector2d(25.75,-14.35), Math.toRadians(90))
                 .UNSTABLE_addTemporalMarkerOffset(0.5, () ->{
                     raiseHeight(2900);
                 })
@@ -87,8 +87,8 @@ public class RightAutoFivePlus extends LinearOpMode {
                     slide.setPower(0);
                 })
                 .waitSeconds(3.8)
-                .lineToConstantHeading(new Vector2d(24.5, -16.65))
-                .lineToSplineHeading(new Pose2d(59,-16.65, Math.toRadians(0)))
+                .lineToConstantHeading(new Vector2d(25, -16.65))
+                .lineToSplineHeading(new Pose2d(60.5,-16.65, Math.toRadians(0)))
                 .UNSTABLE_addTemporalMarkerOffset(0.2, () ->{
                     raiseHeight(440);
                 })
@@ -111,7 +111,7 @@ public class RightAutoFivePlus extends LinearOpMode {
                     raiseHeight(345);
                 })
                 .waitSeconds(1.8)
-                .lineToSplineHeading(new Pose2d(59,-16.65, Math.toRadians(0)))
+                .lineToSplineHeading(new Pose2d(60.5,-16.65, Math.toRadians(0)))
                 .UNSTABLE_addTemporalMarkerOffset(0.2, () -> {
                     slideServo.setPosition(0.48);
                 })
