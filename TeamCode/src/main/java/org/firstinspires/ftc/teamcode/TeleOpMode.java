@@ -38,8 +38,7 @@ public class TeleOpMode extends LinearOpMode {
 
     private List<DcMotor> motors;
 
-    final double rpm = 1150/28.0;
-    final double ppr = 145.1*28;
+    final double ppr = 1992.6;
     boolean release = false;
 
     // operational constants
@@ -49,7 +48,7 @@ public class TeleOpMode extends LinearOpMode {
     public Servo claw, slideServo;
     public RevBlinkinLedDriver lights;
 
-    final double OPEN = 0.19;
+    final double OPEN = 0.38;
     final double CLOSE = 1.00;
     public static boolean clawClosed = false;
     public static boolean slideExtended = false;
@@ -146,6 +145,8 @@ public class TeleOpMode extends LinearOpMode {
 
         arm.setPower(0);
         sleep(10);
+        setAngle(0);
+        sleep(10);
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
@@ -191,6 +192,7 @@ public class TeleOpMode extends LinearOpMode {
                 telemetry.addLine("driveMode: brake");
             else
                 telemetry.addLine("driveMode: no brake");
+
             if (arm.getCurrentPosition() <= 1000)
                 telemetry.addLine("arm not high enough for turntable");
             else
