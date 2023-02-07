@@ -22,7 +22,6 @@ import java.util.List;
 
 
 @TeleOp(name="Robot Centric TeleOp", group="Linear Opmode")
-//@Disabled
 
 public class TeleOpMode extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
@@ -48,8 +47,8 @@ public class TeleOpMode extends LinearOpMode {
     public Servo claw, slideServo;
     public RevBlinkinLedDriver lights;
 
-    final double OPEN = 0.38;
-    final double CLOSE = 1.00;
+    final double OPEN = 0.4;
+    final double CLOSE = 1;
     public static boolean clawClosed = false;
     public static boolean slideExtended = false;
 
@@ -183,11 +182,15 @@ public class TeleOpMode extends LinearOpMode {
                     lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLUE);
             }
 
+            telemetry.addData("gamepad 1 left_stick x: ", gamepad1.left_stick_x);
+            telemetry.addData("gamepad 1 left_stick y: ", gamepad1.left_stick_y);
+            telemetry.addData("gamepad 1 right_stick x: ", gamepad2.right_stick_x);
             telemetry.addData("arm pos: ", arm.getCurrentPosition());
             telemetry.addData("level: ", level);
             telemetry.addData("slide servo: ", slideServo.getPosition());
             telemetry.addData("leftFront power: ", lf.getPower());
             telemetry.addData("time elapsed (seconds): ", runtime.seconds());
+            telemetry.addData("heading: ", getAngle());
             if (driveMode)
                 telemetry.addLine("driveMode: brake");
             else
@@ -441,6 +444,22 @@ public class TeleOpMode extends LinearOpMode {
         telemetry.addData("gyro: ", orientation.firstAngle);
 
         return currAngle;
+    }
+
+    public void turn(double degrees)
+    {
+        resetAngle();
+
+        double error = degrees;
+
+        double motorPower = 0;
+        while (Math.abs(error) > 2)
+        {
+            motorPower = (error < 0 ? -1*gamepad1.right_stick_x:gamepad1.right_stick_x);
+            error = degrees - getAngle();
+            telemetry.addData("error: ", error);
+        }
+        motorPower = 0;
     }
 
 }

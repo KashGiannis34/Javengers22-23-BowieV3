@@ -68,10 +68,6 @@ public class RightAutoStates extends LinearOpMode {
         claw = hardwareMap.servo.get("clawServo");
         slideServo = hardwareMap.servo.get("slideServo");
 
-        Pose2d startPose = new Pose2d(40,-66,Math.toRadians(90));
-        robot.setPoseEstimate(startPose);
-
-
         rightDist = hardwareMap.get(DistanceSensor.class, "rightDistance");
         leftDist = hardwareMap.get(DistanceSensor.class, "leftDistance");
         //color = hardwareMap.get(ColorSensor.class, "color");
@@ -80,11 +76,49 @@ public class RightAutoStates extends LinearOpMode {
         carousel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         carousel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
+        Pose2d startPose = new Pose2d(32,-62,Math.toRadians(90));
+        robot.setPoseEstimate(startPose);
+
+        TrajectorySequence trajSeq = robot.trajectorySequenceBuilder(startPose)
+//                .UNSTABLE_addTemporalMarkerOffset(0, () ->
+//                {
+//                    raiseHeight(1170);
+//                    setAngle(-30);
+//                    slideServo.setPosition(1);
+//                })
+//                .waitSeconds(0.6)
+//                .UNSTABLE_addTemporalMarkerOffset(0, () ->
+//                {
+//                    claw.setPosition(0);
+//                })
+//                .waitSeconds(0.3)
+//                .UNSTABLE_addTemporalMarkerOffset(0, () ->
+//                {
+//                    slideServo.setPosition(0.1);
+//                })
+//                .waitSeconds(0.2)
+                .splineToConstantHeading(new Vector2d(12, -58), Math.toRadians(90))
+                .splineTo(new Vector2d(12, -11), Math.toRadians(90))
+                .lineToLinearHeading(new Pose2d(57,-11, Math.toRadians(0)))
+                .build();
+
+        TrajectorySequence parkRight = robot.trajectorySequenceBuilder(trajSeq.end())
+                .lineToConstantHeading(new Vector2d(61, -11))
+                .build();
+
+        TrajectorySequence parkMiddle = robot.trajectorySequenceBuilder(trajSeq.end())
+                .lineToConstantHeading(new Vector2d(37, -11))
+                .build();
+
+        TrajectorySequence parkLeft = robot.trajectorySequenceBuilder(trajSeq.end())
+                .lineToConstantHeading(new Vector2d(13, -11))
+                .build();
+
 //        zeroPos = slide.getCurrentPosition();
         claw.setPosition(1);
         slideServo.setPosition(0.1);
-        sleep(10);
-        raiseHeight(20);
+        sleep(100);
+        raiseHeight2(50);
         sleep(10);
         setAngle(0);
         sleep(10);
@@ -192,35 +226,52 @@ public class RightAutoStates extends LinearOpMode {
         }
         etime.reset();
 
-        sleep(100);
-        raiseHeight(1100);
-        setAngle(125);
-        slideServo.setPosition(0.38);
-        sleep(500);
-        claw.setPosition(0.4);
-        sleep(150);
-        setAngle(0);
-        sleep(500);
+        robot.followTrajectorySequence(trajSeq);
 
-        int[] stackHeights = {360, 273, 185, 98, 10};
+        sleep(100);
+        raiseHeight(1170);
+        setAngle(122);
+        slideServo.setPosition(0.4);
+        sleep(400);
+        claw.setPosition(0);
+        sleep(150);
+        slideServo.setPosition(0.1);
+
+//        int[] stackHeights = {360, 273, 185, 98, 10};
+        int[] stackHeights = {355, 268, 180, 93, 5};
         for (int n = 0; n < stackHeights.length; n++) {
-            raiseHeight(stackHeights[n]);
+            if (etime.seconds() >= 27)
+                break;
+            setMotorPos(0, stackHeights[n]);
+            slideServo.setPosition(0.4);
+            sleep(300);
             claw.setPosition(1);
             sleep(300);
-            raiseHeight(1100);
-            setAngle(125);
-            slideServo.setPosition(0.38);
+            raiseHeightAndServo(1170, 0.3);
+            setAngle(120-0.5*n);
+            slideServo.setPosition(0.4);
             sleep(500);
-            claw.setPosition(0.4);
+            if (n >= stackHeights.length-2)
+                claw.setPosition(0.4);
+            else
+                claw.setPosition(0);
             sleep(150);
-            setAngle(0);
+            slideServo.setPosition(0.1);
         }
-        setAngle(0);
-        sleep(50);
-        raiseHeight(10);
-        sleep(100);
+        setMotorPos2(0,10);
         slideServo.setPosition(0.1);
         sleep(50);
+
+        if (tagOfInterest == null || tagOfInterest.id == RIGHT)
+            robot.followTrajectorySequence(parkRight);
+        else if (tagOfInterest.id == MIDDLE)
+            robot.followTrajectorySequence(parkMiddle);
+        else if (tagOfInterest.id == LEFT)
+            robot.followTrajectorySequence(parkLeft);
+        else
+            robot.followTrajectorySequence(parkRight);
+
+
 
 
         Pose2d poseEstimate = robot.getPoseEstimate();
@@ -238,28 +289,52 @@ public class RightAutoStates extends LinearOpMode {
         while (!isStopRequested() && opModeIsActive()) ;
     }
 
-    void raiseHeight(int num)
+    void raiseHeight(double num)
     {
         while (opModeIsActive()) {
             if (slide.getCurrentPosition() > num) {
-                slide.setTargetPosition(num);
+                slide.setTargetPosition((int) num);
                 slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                slide.setPower(-0.7);
+                slide.setPower(-0.8);
             }
             else {
-                slide.setTargetPosition(num);
+                slide.setTargetPosition((int) num);
                 slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 slide.setPower(1);
             }
 
-            if (Math.abs(slide.getCurrentPosition()-num) <= 10) {
+            if (slide.getCurrentPosition()-num >= 0) {
                 slide.setPower(0.2);
                 break;
             }
         }
     }
 
-    void setAngle(int angle)
+    void raiseHeightAndServo(double num, double servoPos)
+    {
+        while (opModeIsActive()) {
+            if (slide.getCurrentPosition() > num) {
+                slide.setTargetPosition((int) num);
+                slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                slide.setPower(-0.8);
+            }
+            else {
+                slide.setTargetPosition((int) num);
+                slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                slide.setPower(1);
+            }
+
+            if (slide.getCurrentPosition() >= 450)
+                slideServo.setPosition(servoPos);
+
+            if (slide.getCurrentPosition()-num >= 0) {
+                slide.setPower(0.2);
+                break;
+            }
+        }
+    }
+
+    void setAngle(double angle)
     {
         int pos = (int)(ppr*angle/360.0);
         while (opModeIsActive()) {
@@ -274,12 +349,104 @@ public class RightAutoStates extends LinearOpMode {
                 carousel.setPower(0.7);
             }
 
-            if (Math.abs(carousel.getCurrentPosition()-pos) <= 3) {
+            if (carousel.getCurrentPosition()-pos >= 0) {
                 carousel.setPower(0);
                 break;
             }
         }
     }
+
+    void setMotorPos(double angle, double height)
+    {
+        int pos = (int)(ppr*angle/360.0);
+        while (opModeIsActive()) {
+            if (slide.getCurrentPosition() > height) {
+                slide.setTargetPosition((int) height);
+                slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                slide.setPower(-0.8);
+            }
+            else {
+                slide.setTargetPosition((int) height);
+                slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                slide.setPower(1);
+            }
+
+            if (carousel.getCurrentPosition() > (int) (ppr * angle / 360.0)) {
+                carousel.setTargetPosition(pos);
+                carousel.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                carousel.setPower(-0.7);
+            }
+            else {
+                carousel.setTargetPosition(pos);
+                carousel.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                carousel.setPower(0.7);
+            }
+
+            if (slide.getCurrentPosition()-height >= 0 && carousel.getCurrentPosition()-pos >= -2 && carousel.getCurrentPosition()-pos <= 6) {
+                slide.setPower(0.2);
+                carousel.setPower(0);
+                break;
+            }
+        }
+
+
+    }
+
+    void setMotorPos2(double angle, double height)
+    {
+        int pos = (int)(ppr*angle/360.0);
+        while (opModeIsActive()) {
+            if (slide.getCurrentPosition() > height) {
+                slide.setTargetPosition((int) height);
+                slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                slide.setPower(-0.8);
+            }
+            else {
+                slide.setTargetPosition((int) height);
+                slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                slide.setPower(1);
+            }
+
+            if (carousel.getCurrentPosition() > (int) (ppr * angle / 360.0)) {
+                carousel.setTargetPosition(pos);
+                carousel.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                carousel.setPower(-0.7);
+            }
+            else {
+                carousel.setTargetPosition(pos);
+                carousel.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                carousel.setPower(0.7);
+            }
+
+            if (slide.getCurrentPosition()-height >= 0 && carousel.getCurrentPosition()-pos >= -2 && carousel.getCurrentPosition()-pos <= 2) {
+                slide.setPower(0.2);
+                carousel.setPower(0);
+                break;
+            }
+        }
+
+
+    }
+
+    void raiseHeight2(int num)
+    {
+        slide.setTargetPosition(num+zeroPos);
+        if (slide.getCurrentPosition() > num+zeroPos)
+            slide.setPower(-0.4);
+        else
+            slide.setPower(1);
+        slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        while (slide.isBusy()) {
+
+        }
+
+        // slide.setPower(0.2);
+
+        //clawSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    }
+
+
 
     void tagToTelemetry(AprilTagDetection detection)
     {

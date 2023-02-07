@@ -15,10 +15,9 @@ public class TrajectoryTesting {
                 .setConstraints(32.281655, 30, Math.toRadians(150), Math.toRadians(150), 13.0)
                 .followTrajectorySequence(drive ->
                         drive.trajectorySequenceBuilder(new Pose2d(40,-66,Math.toRadians(90)))
-                                .splineToConstantHeading(new Vector2d(-10, -55), Math.toRadians(90))
-                                .splineToConstantHeading(new Vector2d(-10, -18), Math.toRadians(90))
-                                .splineToConstantHeading(new Vector2d(-25.2,-18), Math.toRadians(90))
-                                .lineToSplineHeading(new Pose2d(-47.5,-17.8, Math.toRadians(270)))
+                                .splineToConstantHeading(new Vector2d(12, -58), Math.toRadians(90))
+                                .splineTo(new Vector2d(12, -18), Math.toRadians(90))
+                                .lineToLinearHeading(new Pose2d(60.5,-16.65, Math.toRadians(0)))
                                 .build()
                 );
 
