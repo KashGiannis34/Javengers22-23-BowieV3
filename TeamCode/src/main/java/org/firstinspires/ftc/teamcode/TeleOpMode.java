@@ -34,11 +34,16 @@ public class TeleOpMode extends LinearOpMode {
     BNO055IMU imu;
     Orientation lastAngles = new Orientation();
     private double currAngle = 0.0;
+    boolean gamepad1AisPressed = false;
+    boolean gamepad2AisPressed = false;
+    boolean gamepad1YisPressed = false;
+    int stackCount = -1;
+    boolean angleChanged  = false;
+    double startTime;
 
     private List<DcMotor> motors;
 
     final double ppr = 1992.6;
-    boolean release = false;
 
     // operational constants
     double joyScale = 0.6;
@@ -50,16 +55,20 @@ public class TeleOpMode extends LinearOpMode {
     final double OPEN = 0.4;
     final double CLOSE = 1;
     public static boolean clawClosed = false;
-    public static boolean slideExtended = false;
+    public static int slideExtended = 0;
 
     public enum Height
     {
         NONE,
         GROUND,
+        CLAWUP,
         LOW,
         MEDIUM,
         HIGH,
-        STACK
+        STACK5,
+        STACK4,
+        STACK3,
+        STACK2
     }
 
     public enum LightOverride
@@ -151,15 +160,14 @@ public class TeleOpMode extends LinearOpMode {
         while (opModeIsActive()) {
 
             drive();
-            ground();
+            release();
             low();
             medium();
             high();
-            release();
             clawMove();
             stack();
-            setSlideServo();
             setTurnTable();
+            setSlideServo();
             setMotorType();
             if (runtime.seconds() >= 110)
             {
@@ -182,14 +190,14 @@ public class TeleOpMode extends LinearOpMode {
                     lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLUE);
             }
 
-            telemetry.addData("gamepad 1 left_stick x: ", gamepad1.left_stick_x);
-            telemetry.addData("gamepad 1 left_stick y: ", gamepad1.left_stick_y);
-            telemetry.addData("gamepad 1 right_stick x: ", gamepad2.right_stick_x);
+            telemetry.addData("gamepad2 x: ", gamepad2.x);
             telemetry.addData("arm pos: ", arm.getCurrentPosition());
             telemetry.addData("level: ", level);
+            telemetry.addData("stackCount: ", stackCount);
             telemetry.addData("slide servo: ", slideServo.getPosition());
             telemetry.addData("leftFront power: ", lf.getPower());
             telemetry.addData("time elapsed (seconds): ", runtime.seconds());
+            telemetry.addData("angleChanged: ", angleChanged);
             telemetry.addData("heading: ", getAngle());
             if (driveMode)
                 telemetry.addLine("driveMode: brake");
@@ -253,19 +261,32 @@ public class TeleOpMode extends LinearOpMode {
         rr.setPower(RR);
     }
 
-    public void ground()
+    public void release()
     {
-        if (gamepad2.dpad_down) {
-            level = Height.GROUND;
-            raiseHeight(100);
+        if (gamepad2.dpad_down && !angleChanged) {
+            level = Height.NONE;
+            raiseHeight(5);
         }
+
+        if (gamepad2.dpad_down && angleChanged)
+        {
+            level = Height.NONE;
+            setAngle(0);
+            angleChanged = false;
+            if (slideServo.getPosition() != 1) {
+                slideExtended = 0;
+            }
+        }
+
+        if (Math.abs(carousel.getCurrentPosition()) <= 100 && level == Height.NONE)
+            raiseHeight(5);
     }
 
     public void low()
     {
         if (gamepad2.dpad_left) {
             level = Height.LOW;
-            raiseHeight(1250);
+            raiseHeight(1180);
         }
     }
 
@@ -273,7 +294,7 @@ public class TeleOpMode extends LinearOpMode {
     {
         if (gamepad2.dpad_up) {
             level = Height.MEDIUM;
-            raiseHeight(2100);
+            raiseHeight(2070);
         }
     }
 
@@ -281,68 +302,93 @@ public class TeleOpMode extends LinearOpMode {
     {
         if (gamepad2.dpad_right) {
             level = Height.HIGH;
-            raiseHeight(2900);
+            raiseHeight(2820);
         }
     }
 
     public void clawMove()
     {
-        if (gamepad1.a) {
+        if (gamepad1.a && !gamepad1AisPressed)
+        {
+            if (clawClosed)
+                clawClosed = false;
+            else
+                clawClosed = true;
+
+            gamepad1AisPressed = true;
+            startTime = runtime.milliseconds();
+        }
+
+        if (gamepad1AisPressed && !gamepad1.a)
+            gamepad1AisPressed = false;
+
+        if (!clawClosed) {
             claw.setPosition(OPEN);
-            clawClosed = false;
             if (overrides == LightOverride.NONE)
                 lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLUE);
-            if (level == Height.GROUND) {
-                arm.setPower(0);
+            if (level == Height.CLAWUP) {
+                raiseHeight(5);
                 level = Height.NONE;
             }
         }
-        if (gamepad1.y) {
+        else {
             claw.setPosition(CLOSE);
-            clawClosed = true;
             if (overrides == LightOverride.NONE)
                 lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
-            if (level == Height.NONE) {
-                level = Height.GROUND;
-                raiseHeight(30);
-            }
-        }
-    }
 
-    public void release()
-    {
-        if (gamepad2.left_bumper || gamepad2.right_bumper) {
-            raiseHeight(10);
-            level = Height.NONE;
+            if (level == Height.NONE) {
+                level = Height.CLAWUP;
+            }
+
+            telemetry.addData("claw time: ",runtime.milliseconds() - startTime);
+            if (runtime.milliseconds()-startTime >= 300 && level == Height.CLAWUP)
+                raiseHeight(50);
         }
     }
 
     public void stack()
     {
-        if (gamepad2.y) {
-            level = Height.STACK;
+        if (gamepad2.a && !gamepad2AisPressed && !angleChanged)
+        {
+            if (stackCount == -1)
+                stackCount = 0;
+            else
+                stackCount++;
+
+            if (stackCount % 4 == 0)
+                level = Height.STACK5;
+            else if (stackCount % 4 == 1)
+                level = Height.STACK4;
+            else if (stackCount % 4 == 2)
+                level = Height.STACK3;
+            else
+                level = Height.STACK2;
+
+
+            gamepad2AisPressed = true;
+            startTime = runtime.milliseconds();
+        }
+
+        if (gamepad2AisPressed && !gamepad2.a)
+            gamepad2AisPressed = false;
+
+        if (!(level == Height.STACK2 || level == Height.STACK3 || level == Height.STACK4 || level == Height.STACK5))
+            stackCount = -1;
+
+        if (stackCount % 4 == 0 && !angleChanged)
             raiseHeight(380);
-        }
-
-        if (gamepad2.b) {
-            level = Height.STACK;
+        else if (stackCount % 4 == 1 && !angleChanged)
             raiseHeight(288);
-        }
-
-        if (gamepad2.a) {
-            level = Height.STACK;
+        else if (stackCount % 4 == 2 && !angleChanged)
             raiseHeight(195);
-        }
-
-        if (gamepad2.x) {
-            level = Height.STACK;
+        else if (stackCount % 4 == 3 && stackCount != -1 && !angleChanged)
             raiseHeight(103);
-        }
     }
 
     public void setAngle(int angle)
     {
         int pos = (int)(ppr*angle/360.0);
+
         if (carousel.getCurrentPosition() > pos) {
             carousel.setTargetPosition(pos);
             carousel.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -356,32 +402,69 @@ public class TeleOpMode extends LinearOpMode {
 
     public void setTurnTable()
     {
-        if (gamepad1.dpad_left && arm.getCurrentPosition() > 1000)
+        if (gamepad2.x && (arm.getCurrentPosition() > 1000 || (level == Height.LOW || level == Height.MEDIUM || level == Height.HIGH)))
         {
+            angleChanged = true;
             setAngle(-90);
+            if (slideServo.getPosition() != 1) {
+                slideExtended = -1;
+            }
         }
-        if (gamepad1.dpad_right && arm.getCurrentPosition() > 1000)
+        if (gamepad2.b && (arm.getCurrentPosition() > 1000 || (level == Height.LOW || level == Height.MEDIUM || level == Height.HIGH)))
         {
+            angleChanged = true;
             setAngle(90);
+            if (slideServo.getPosition() != 1) {
+                slideExtended = -1;
+            }
         }
-        if (gamepad1.dpad_up && arm.getCurrentPosition() > 1000)
+        if (gamepad2.y && (arm.getCurrentPosition() > 1000 || (level == Height.LOW || level == Height.MEDIUM || level == Height.HIGH)))
         {
+            angleChanged = false;
             setAngle(0);
+            if (slideServo.getPosition() != 1) {
+                slideExtended = 0;
+            }
         }
     }
 
     public void setSlideServo()
     {
-        if (gamepad1.x)
+        if (gamepad1.y && !gamepad1YisPressed)
+        {
+            if (slideExtended != 0)
+                slideExtended = 0;
+            else if (slideExtended == 0)
+                slideExtended = 1;
+
+            gamepad1YisPressed = true;
+        }
+
+        if (gamepad1YisPressed && !gamepad1.y)
+            gamepad1YisPressed = false;
+
+        if (slideExtended == 0)
         {
             slideServo.setPosition(0.1);
-            slideExtended = false;
         }
-        if (gamepad1.b)
+        else if (slideExtended == 1)
         {
             slideServo.setPosition(1);
-            slideExtended = true;
         }
+        else if (slideExtended == -1 && Math.abs(arm.getTargetPosition()-arm.getCurrentPosition()) <= 10)
+        {
+            slideServo.setPosition(0.34);
+        }
+        else if (slideExtended == -2)
+            slideServo.setPosition(0.31);
+        else if (slideExtended == -3)
+            slideServo.setPosition(0.37);
+
+
+        if (gamepad2.left_bumper && (slideServo.getPosition() == 0.34 || slideServo.getPosition() == 0.37))
+            slideExtended = -2;
+        if (gamepad2.right_bumper && (slideServo.getPosition() == 0.31 || slideServo.getPosition() == 0.34))
+            slideExtended = -3;
     }
 
     public void raiseHeight(int height)
