@@ -155,6 +155,7 @@ public class TeleOpMode extends LinearOpMode {
         sleep(10);
         setAngle(0);
         sleep(10);
+        slideServo.setPosition(0);
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
@@ -199,6 +200,7 @@ public class TeleOpMode extends LinearOpMode {
             telemetry.addData("time elapsed (seconds): ", runtime.seconds());
             telemetry.addData("angleChanged: ", angleChanged);
             telemetry.addData("heading: ", getAngle());
+            telemetry.addData("slide servo: ", slideServo.getPosition());
             if (driveMode)
                 telemetry.addLine("driveMode: brake");
             else
@@ -342,7 +344,7 @@ public class TeleOpMode extends LinearOpMode {
 
             telemetry.addData("claw time: ",runtime.milliseconds() - startTime);
             if (runtime.milliseconds()-startTime >= 300 && level == Height.CLAWUP)
-                raiseHeight(50);
+                raiseHeight(80);
         }
     }
 
@@ -376,13 +378,13 @@ public class TeleOpMode extends LinearOpMode {
             stackCount = -1;
 
         if (stackCount % 4 == 0 && !angleChanged)
-            raiseHeight(380);
+            raiseHeight(355);
         else if (stackCount % 4 == 1 && !angleChanged)
-            raiseHeight(288);
+            raiseHeight(268);
         else if (stackCount % 4 == 2 && !angleChanged)
-            raiseHeight(195);
+            raiseHeight(180);
         else if (stackCount % 4 == 3 && stackCount != -1 && !angleChanged)
-            raiseHeight(103);
+            raiseHeight(93);
     }
 
     public void setAngle(int angle)
@@ -406,7 +408,7 @@ public class TeleOpMode extends LinearOpMode {
         {
             angleChanged = true;
             setAngle(-90);
-            if (slideServo.getPosition() != 1) {
+            if (slideServo.getPosition() != 0.5) {
                 slideExtended = -1;
             }
         }
@@ -414,7 +416,7 @@ public class TeleOpMode extends LinearOpMode {
         {
             angleChanged = true;
             setAngle(90);
-            if (slideServo.getPosition() != 1) {
+            if (slideServo.getPosition() != 0.5) {
                 slideExtended = -1;
             }
         }
@@ -422,7 +424,7 @@ public class TeleOpMode extends LinearOpMode {
         {
             angleChanged = false;
             setAngle(0);
-            if (slideServo.getPosition() != 1) {
+            if (slideServo.getPosition() != 0.5) {
                 slideExtended = 0;
             }
         }
@@ -445,25 +447,25 @@ public class TeleOpMode extends LinearOpMode {
 
         if (slideExtended == 0)
         {
-            slideServo.setPosition(0.1);
+            slideServo.setPosition(0);
         }
         else if (slideExtended == 1)
         {
-            slideServo.setPosition(1);
+            slideServo.setPosition(0.5);
         }
         else if (slideExtended == -1 && Math.abs(arm.getTargetPosition()-arm.getCurrentPosition()) <= 10)
         {
-            slideServo.setPosition(0.34);
+            slideServo.setPosition(0.4);
         }
         else if (slideExtended == -2)
-            slideServo.setPosition(0.31);
+            slideServo.setPosition(0.35);
         else if (slideExtended == -3)
-            slideServo.setPosition(0.37);
+            slideServo.setPosition(0.45);
 
 
-        if (gamepad2.left_bumper && (slideServo.getPosition() == 0.34 || slideServo.getPosition() == 0.37))
+        if (gamepad2.left_bumper && (slideServo.getPosition() == 0.4 || slideServo.getPosition() == 0.45))
             slideExtended = -2;
-        if (gamepad2.right_bumper && (slideServo.getPosition() == 0.31 || slideServo.getPosition() == 0.34))
+        if (gamepad2.right_bumper && (slideServo.getPosition() == 0.35 || slideServo.getPosition() == 0.4))
             slideExtended = -3;
     }
 
