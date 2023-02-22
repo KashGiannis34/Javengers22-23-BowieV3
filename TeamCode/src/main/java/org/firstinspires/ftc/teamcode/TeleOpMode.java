@@ -34,12 +34,21 @@ public class TeleOpMode extends LinearOpMode {
     BNO055IMU imu;
     Orientation lastAngles = new Orientation();
     private double currAngle = 0.0;
+    double targetHeading = 0;
+    double correctionPower = 0;
+    double kP = 0.01;
+    double start = 0;
+
+
     boolean gamepad1AisPressed = false;
     boolean gamepad2AisPressed = false;
     boolean gamepad1YisPressed = false;
+    boolean gamepad1RightB = false;
+    boolean gamepad1X = false;
     int stackCount = -1;
     boolean angleChanged  = false;
     double startTime;
+    boolean resetOverride = false;
 
     private List<DcMotor> motors;
 
@@ -56,6 +65,7 @@ public class TeleOpMode extends LinearOpMode {
     final double CLOSE = 1;
     public static boolean clawClosed = false;
     public static int slideExtended = 0;
+    boolean start2Set;
 
     public enum Height
     {
@@ -77,7 +87,26 @@ public class TeleOpMode extends LinearOpMode {
         COUNTDOWN
     }
 
+    public enum MacroOverride
+    {
+        NONE,
+        STATE1,
+        STATE2
+    }
+
+    public enum RaiseState
+    {
+        NONE,
+        STATE1,
+        STATE2
+    }
+
+    RaiseState rS = RaiseState.NONE;
+
+    MacroOverride mco = MacroOverride.NONE;
+
     LightOverride overrides = LightOverride.NONE;
+
     Height level = Height.NONE;
     public static boolean driveMode = true;
 
@@ -161,15 +190,19 @@ public class TeleOpMode extends LinearOpMode {
         while (opModeIsActive()) {
 
             drive();
-            release();
-            low();
-            medium();
-            high();
-            clawMove();
-            stack();
-            setTurnTable();
-            setSlideServo();
-            setMotorType();
+            // macroCollect();
+            if (mco == MacroOverride.NONE) {
+                release();
+                low();
+                medium();
+                high();
+                clawMove();
+                stack();
+                setTurnTable();
+                setSlideServo();
+                setMotorType();
+            }
+
             if (runtime.seconds() >= 110)
             {
                 overrides = LightOverride.COUNTDOWN;
@@ -201,6 +234,7 @@ public class TeleOpMode extends LinearOpMode {
             telemetry.addData("angleChanged: ", angleChanged);
             telemetry.addData("heading: ", getAngle());
             telemetry.addData("slide servo: ", slideServo.getPosition());
+            telemetry.addData("mco: ", mco);
             if (driveMode)
                 telemetry.addLine("driveMode: brake");
             else
@@ -227,8 +261,15 @@ public class TeleOpMode extends LinearOpMode {
         // Get joystick values
         Y1 = -gamepad1.left_stick_y * joyScale; // invert so up is positive
         X1 = gamepad1.left_stick_x * joyScale;
-        Y2 = -gamepad1.right_stick_y * joyScale; // Y2 is not used at present
         X2 = gamepad1.right_stick_x * joyScale;
+//        targetHeading += gamepad1.right_stick_x*joyScale;
+//        if (targetHeading > 180)
+//            targetHeading -= 360;
+//        else if (targetHeading <= -180)
+//            targetHeading += 360;
+//        double error = targetHeading - getAngle();
+//        correctionPower = error * kP;
+
 
         // Forward/back movement
         LF += Y1;
@@ -261,6 +302,100 @@ public class TeleOpMode extends LinearOpMode {
         rf.setPower(RF);
         lr.setPower(LR);
         rr.setPower(RR);
+    }
+
+    public void macroCollect()
+    {
+        if (gamepad1.x && !gamepad1X)
+        {
+            if (mco == MacroOverride.NONE && level == Height.NONE)
+            {
+                mco = MacroOverride.STATE1;
+                start = System.currentTimeMillis();
+                start2Set = false;
+
+            }
+            else if (mco == MacroOverride.STATE1)
+            {
+                mco = MacroOverride.STATE2;
+                start = System.currentTimeMillis();
+                rS = RaiseState.NONE;
+            }
+            else if (mco == MacroOverride.STATE2)
+            {
+                mco = MacroOverride.STATE1;
+                start = System.currentTimeMillis();
+                start2Set = false;
+            }
+            gamepad1X = true;
+        }
+
+        if (gamepad1X && !gamepad1.x)
+            gamepad1X = false;
+
+        if (gamepad1.left_bumper && mco != MacroOverride.NONE)
+        {
+            setAngle(0);
+            raiseHeight(5);
+            mco = MacroOverride.NONE;
+            resetOverride = true;
+        }
+
+        if (resetOverride && Math.abs(getCarouselAngle()) <= 10)
+        {
+            slideServo.setPosition(0);
+            resetOverride = false;
+        }
+
+        if (mco == MacroOverride.STATE1)
+        {
+            claw.setPosition(0.4);
+
+            if (System.currentTimeMillis() - start >= 200) {
+                if (slideServo.getPosition() != 0.65 && !start2Set)
+                    slideServo.setPosition(0.45);
+                double start2 = 0;
+                if (!start2Set) {
+                    start2 = System.currentTimeMillis();
+                    start2Set = true;
+                }
+
+                if (start2Set && System.currentTimeMillis() - start2 >= 500)
+                {
+                    setAngle(-90);
+                    raiseHeight(5);
+                    if (Math.abs(-90-getCarouselAngle()) <= 5 && arm.getCurrentPosition() <= 10)
+                        slideServo.setPosition(0.65);
+                }
+            }
+        }
+        else if (mco == MacroOverride.STATE2)
+        {
+            claw.setPosition(1);
+
+            if (System.currentTimeMillis()- start >= 300) {
+                if (rS == RaiseState.NONE) {
+                    raiseHeight(600);
+                    rS = RaiseState.STATE1;
+                }
+                if (arm.getCurrentPosition() >= 550 && rS == RaiseState.STATE1) {
+                    slideServo.setPosition(0);
+                    rS = RaiseState.STATE2;
+                }
+
+                if (rS == RaiseState.STATE2) {
+                    raiseHeight(2820);
+                    setAngle(90);
+                    if (arm.getCurrentPosition() >= 2800 && Math.abs(getCarouselAngle()-90) <= 5)
+                        slideServo.setPosition(0.4);
+                }
+            }
+        }
+    }
+
+    double getCarouselAngle()
+    {
+        return (carousel.getCurrentPosition()*360.0/ppr);
     }
 
     public void release()
@@ -296,7 +431,7 @@ public class TeleOpMode extends LinearOpMode {
     {
         if (gamepad2.dpad_up) {
             level = Height.MEDIUM;
-            raiseHeight(2070);
+            raiseHeight(1990);
         }
     }
 
@@ -304,7 +439,7 @@ public class TeleOpMode extends LinearOpMode {
     {
         if (gamepad2.dpad_right) {
             level = Height.HIGH;
-            raiseHeight(2820);
+            raiseHeight(2780);
         }
     }
 
@@ -408,7 +543,7 @@ public class TeleOpMode extends LinearOpMode {
         {
             angleChanged = true;
             setAngle(-90);
-            if (slideServo.getPosition() != 0.5) {
+            if (slideServo.getPosition() != 0.6) {
                 slideExtended = -1;
             }
         }
@@ -416,7 +551,7 @@ public class TeleOpMode extends LinearOpMode {
         {
             angleChanged = true;
             setAngle(90);
-            if (slideServo.getPosition() != 0.5) {
+            if (slideServo.getPosition() != 0.6) {
                 slideExtended = -1;
             }
         }
@@ -424,7 +559,7 @@ public class TeleOpMode extends LinearOpMode {
         {
             angleChanged = false;
             setAngle(0);
-            if (slideServo.getPosition() != 0.5) {
+            if (slideServo.getPosition() != 0.6) {
                 slideExtended = 0;
             }
         }
@@ -451,21 +586,21 @@ public class TeleOpMode extends LinearOpMode {
         }
         else if (slideExtended == 1)
         {
-            slideServo.setPosition(0.5);
+            slideServo.setPosition(0.6);
         }
         else if (slideExtended == -1 && Math.abs(arm.getTargetPosition()-arm.getCurrentPosition()) <= 10)
         {
-            slideServo.setPosition(0.4);
+            slideServo.setPosition(0.365);
         }
         else if (slideExtended == -2)
-            slideServo.setPosition(0.35);
+            slideServo.setPosition(0.415);
         else if (slideExtended == -3)
-            slideServo.setPosition(0.45);
+            slideServo.setPosition(0.315);
 
 
-        if (gamepad2.left_bumper && (slideServo.getPosition() == 0.4 || slideServo.getPosition() == 0.45))
+        if (gamepad2.left_bumper && (slideServo.getPosition() == 0.365 || slideServo.getPosition() == 0.315))
             slideExtended = -2;
-        if (gamepad2.right_bumper && (slideServo.getPosition() == 0.35 || slideServo.getPosition() == 0.4))
+        if (gamepad2.right_bumper && (slideServo.getPosition() == 0.415 || slideServo.getPosition() == 0.365))
             slideExtended = -3;
     }
 
@@ -484,9 +619,21 @@ public class TeleOpMode extends LinearOpMode {
 
     public void setMotorType()
     {
-        if (gamepad1.left_bumper)
+        if (gamepad1.right_bumper && !gamepad1RightB)
         {
-            driveMode = true;
+            if (!driveMode)
+                driveMode = true;
+            else
+                driveMode = false;
+
+            gamepad1RightB = true;
+        }
+
+        if (gamepad1RightB && !gamepad1.right_bumper)
+            gamepad1RightB = false;
+
+        if (driveMode)
+        {
             for (DcMotor motor : motors) {
                 MotorConfigurationType motorConfigurationType = motor.getMotorType().clone();
                 motorConfigurationType.setAchieveableMaxRPMFraction(1.0);
@@ -495,9 +642,8 @@ public class TeleOpMode extends LinearOpMode {
             }
         }
 
-        if (gamepad1.right_bumper)
+        if (!driveMode)
         {
-            driveMode = false;
             for (DcMotor motor : motors) {
                 MotorConfigurationType motorConfigurationType = motor.getMotorType().clone();
                 motorConfigurationType.setAchieveableMaxRPMFraction(1.0);
@@ -526,7 +672,6 @@ public class TeleOpMode extends LinearOpMode {
 
         currAngle += deltaAngle;
         lastAngles = orientation;
-        telemetry.addData("gyro: ", orientation.firstAngle);
 
         return currAngle;
     }
