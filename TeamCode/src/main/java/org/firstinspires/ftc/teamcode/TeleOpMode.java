@@ -38,6 +38,7 @@ public class TeleOpMode extends LinearOpMode {
     double correctionPower = 0;
     double kP = 0.01;
     double start = 0;
+    double startDown = 0;
 
 
     boolean gamepad1AisPressed = false;
@@ -78,7 +79,8 @@ public class TeleOpMode extends LinearOpMode {
         STACK5,
         STACK4,
         STACK3,
-        STACK2
+        STACK2,
+        HEIGHT_OVERRIDE
     }
 
     public enum LightOverride
@@ -192,15 +194,18 @@ public class TeleOpMode extends LinearOpMode {
             drive();
             // macroCollect();
             if (mco == MacroOverride.NONE) {
-                release();
-                low();
-                medium();
-                high();
+                if (level != Height.HEIGHT_OVERRIDE) {
+                    release();
+                    low();
+                    medium();
+                    high();
+                    stack();
+                }
                 clawMove();
-                stack();
                 setTurnTable();
                 setSlideServo();
                 setMotorType();
+                driveMotorDown();
             }
 
             if (runtime.seconds() >= 110)
@@ -235,6 +240,7 @@ public class TeleOpMode extends LinearOpMode {
             telemetry.addData("heading: ", getAngle());
             telemetry.addData("slide servo: ", slideServo.getPosition());
             telemetry.addData("mco: ", mco);
+            telemetry.addData("startDOwn: ", runtime.milliseconds() - startDown);
             if (driveMode)
                 telemetry.addLine("driveMode: brake");
             else
@@ -690,6 +696,25 @@ public class TeleOpMode extends LinearOpMode {
             telemetry.addData("error: ", error);
         }
         motorPower = 0;
+    }
+
+    public void driveMotorDown()
+    {
+        if (gamepad1.left_bumper && (level == Height.NONE || level == Height.CLAWUP))
+        {
+            level = Height.HEIGHT_OVERRIDE;
+        }
+
+        if (level != Height.HEIGHT_OVERRIDE) 
+            startDown = runtime.milliseconds();
+        else
+            raiseHeight(-50);
+
+        if ((arm.getCurrentPosition() < -45 || runtime.milliseconds() - startDown > 1000) && level == Height.HEIGHT_OVERRIDE) {
+            arm.setPower(0);
+            arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            level = Height.NONE;
+        }
     }
 
 }

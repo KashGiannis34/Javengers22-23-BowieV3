@@ -14,11 +14,10 @@ public class TrajectoryTesting {
                 // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
                 .setConstraints(32.281655, 30, Math.toRadians(150), Math.toRadians(150), 13.0)
                 .followTrajectorySequence(drive ->
-                        drive.trajectorySequenceBuilder(new Pose2d(32,-62,Math.toRadians(90)))
-//                                .splineTo(new Vector2d(32,-44), Math.toRadians(90))
-//                                .splineTo(new Vector2d(42,-11), Math.toRadians(0))
-                                .lineToSplineHeading(new Pose2d(32+(18/5.1),-44, Math.toRadians(0)))
-                                .lineToSplineHeading(new Pose2d(42,-11, Math.toRadians(0)))
+                        drive.trajectorySequenceBuilder(new Pose2d(-40,-62,Math.toRadians(90)))
+                                .splineToConstantHeading(new Vector2d(-12, -55), Math.toRadians(90))
+                                .splineTo(new Vector2d(-12, -25), Math.toRadians(90))
+                                .splineTo(new Vector2d(-47.5,-8), Math.toRadians(180))
                                 .build()
                 );
 
