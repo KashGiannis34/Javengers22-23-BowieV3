@@ -93,15 +93,15 @@ public class RightAutoStatesLow extends LinearOpMode {
                 .build();
 
         TrajectorySequence parkRight = robot.trajectorySequenceBuilder(trajSeq.end())
-                .lineToConstantHeading(new Vector2d(60, -11))
+                .lineToConstantHeading(new Vector2d(58, -11))
                 .build();
 
         TrajectorySequence parkMiddle = robot.trajectorySequenceBuilder(trajSeq.end())
-                .lineToConstantHeading(new Vector2d(36, -11))
+                .lineToConstantHeading(new Vector2d(34, -11))
                 .build();
 
         TrajectorySequence parkLeft = robot.trajectorySequenceBuilder(trajSeq.end())
-                .lineToConstantHeading(new Vector2d(14, -11))
+                .lineToConstantHeading(new Vector2d(10, -11))
                 .build();
 
         claw.setPosition(1);
@@ -226,7 +226,7 @@ public class RightAutoStatesLow extends LinearOpMode {
         robot.followTrajectorySequence(trajSeq);
         claw.setPosition(0.4);
 
-        int[] stackHeights = {390, 312, 215, 128, 40};
+        int[] stackHeights = {385, 307, 208, 125, 35};
         for (int n = 0; n < stackHeights.length; n++) {
 //            if (etime.seconds() >= 24)
 //                break;
@@ -241,7 +241,7 @@ public class RightAutoStatesLow extends LinearOpMode {
 
             claw.setPosition(1);
             sleep(300);
-            raiseHeightAndServoAndAngle(1160, 0.2, 87, 470);
+            raiseHeightAndServoAndAngle(1160, 0.2, 90, 450);
             slideServo.setPosition(0.39);
             sleep(400);
 
