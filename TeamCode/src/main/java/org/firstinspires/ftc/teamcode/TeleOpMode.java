@@ -58,7 +58,7 @@ public class TeleOpMode extends LinearOpMode {
 
     // operational constants
     double joyScale = 0.6;
-    double motorMax = 0.6; // Limit motor power to this value for Andymark RUN_USING_ENCODER mode
+    double motorMax = 0.8; // Limit motor power to this value for Andymark RUN_USING_ENCODER mode
     public DcMotor lf, rf, lr, rr, arm, carousel;
     public Servo claw, slideServo;
     public RevBlinkinLedDriver lights;
@@ -186,7 +186,7 @@ public class TeleOpMode extends LinearOpMode {
         sleep(10);
         setAngle(0);
         sleep(10);
-        slideServo.setPosition(0);
+        slideServo.setPosition(0.5);
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
@@ -232,15 +232,13 @@ public class TeleOpMode extends LinearOpMode {
             telemetry.addData("gamepad2 x: ", gamepad2.x);
             telemetry.addData("arm pos: ", arm.getCurrentPosition());
             telemetry.addData("level: ", level);
-            telemetry.addData("stackCount: ", stackCount);
             telemetry.addData("slide servo: ", slideServo.getPosition());
-            telemetry.addData("leftFront power: ", lf.getPower());
             telemetry.addData("time elapsed (seconds): ", runtime.seconds());
             telemetry.addData("angleChanged: ", angleChanged);
             telemetry.addData("heading: ", getAngle());
             telemetry.addData("slide servo: ", slideServo.getPosition());
             telemetry.addData("mco: ", mco);
-            telemetry.addData("startDOwn: ", runtime.milliseconds() - startDown);
+
             if (driveMode)
                 telemetry.addLine("driveMode: brake");
             else
@@ -349,7 +347,7 @@ public class TeleOpMode extends LinearOpMode {
 
         if (resetOverride && Math.abs(getCarouselAngle()) <= 10)
         {
-            slideServo.setPosition(0);
+            slideServo.setPosition(0.5);
             resetOverride = false;
         }
 
@@ -484,8 +482,8 @@ public class TeleOpMode extends LinearOpMode {
             }
 
             telemetry.addData("claw time: ",runtime.milliseconds() - startTime);
-            if (runtime.milliseconds()-startTime >= 300 && level == Height.CLAWUP)
-                raiseHeight(80);
+            if (runtime.milliseconds()-startTime >= 400 && level == Height.CLAWUP)
+                raiseHeight(150);
         }
     }
 
@@ -582,25 +580,25 @@ public class TeleOpMode extends LinearOpMode {
 
         if (slideExtended == 0)
         {
-            slideServo.setPosition(0);
+            slideServo.setPosition(0.5);
         }
         else if (slideExtended == 1)
         {
-            slideServo.setPosition(0.4);
+            slideServo.setPosition(1);
         }
         else if (slideExtended == -1 && Math.abs(arm.getTargetPosition()-arm.getCurrentPosition()) <= 10)
         {
-            slideServo.setPosition(0.2);
+            slideServo.setPosition(0.8);
         }
         else if (slideExtended == -2)
-            slideServo.setPosition(0.165);
+            slideServo.setPosition(0.75);
         else if (slideExtended == -3)
-            slideServo.setPosition(0.25);
+            slideServo.setPosition(0.85);
 
 
-        if (gamepad2.left_bumper && (slideServo.getPosition() == 0.2 || slideServo.getPosition() == 0.25))
+        if (gamepad2.left_bumper && (slideServo.getPosition() == 0.8 || slideServo.getPosition() == 0.85))
             slideExtended = -2;
-        if (gamepad2.right_bumper && (slideServo.getPosition() == 0.165 || slideServo.getPosition() == 0.2))
+        if (gamepad2.right_bumper && (slideServo.getPosition() == 0.8 || slideServo.getPosition() == 0.75))
             slideExtended = -3;
     }
 
