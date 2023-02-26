@@ -10,21 +10,28 @@ public class TrajectoryTesting {
     public static void main(String[] args) {
         MeepMeep meepMeep = new MeepMeep(700);
 
+        double turnY = -44;
+        Pose2d startPose = new Pose2d(32,-62,Math.toRadians(90));
+        Pose2d endPose = new Pose2d(37,-11,Math.toRadians(0));
+        double slope = ((double)(endPose.getY()-startPose.getY()))/(endPose.getX()-startPose.getX());
+        Pose2d middlePose = new Pose2d(startPose.getX()+18/slope, turnY);
+
+
         RoadRunnerBotEntity myBot = new DefaultBotBuilder(meepMeep)
                 // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
                 .setConstraints(32.281655, 30, Math.toRadians(150), Math.toRadians(150), 13.0)
                 .followTrajectorySequence(drive ->
-                        drive.trajectorySequenceBuilder(new Pose2d(-40,-62,Math.toRadians(90)))
-                                .splineToConstantHeading(new Vector2d(-12, -55), Math.toRadians(90))
-                                .splineTo(new Vector2d(-12, -25), Math.toRadians(90))
-                                .splineTo(new Vector2d(-47.5,-8), Math.toRadians(180))
+                        drive.trajectorySequenceBuilder(startPose)
+                                .lineToSplineHeading(middlePose)
+                                .lineToSplineHeading(endPose)
                                 .build()
                 );
 
         meepMeep.setBackground(MeepMeep.Background.FIELD_POWERPLAY_OFFICIAL)
                 .setDarkMode(false)
-                .setBackgroundAlpha(0.8f)
+                .setBackgroundAlpha(0.3f)
                 .addEntity(myBot)
                 .start();
+
     }
 }

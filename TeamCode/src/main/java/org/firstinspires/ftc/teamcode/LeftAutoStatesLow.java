@@ -221,12 +221,12 @@ public class LeftAutoStatesLow extends LinearOpMode {
         claw.setPosition(0.4);
         sleep(300);
         slideServo.setPosition(0);
-        setMotorPos3(0, 390);
+        setMotorPos3(0, 375);
 
         robot.followTrajectorySequence(trajSeq);
         claw.setPosition(0.4);
 
-        int[] stackHeights = {385, 307, 208, 125, 35};
+        int[] stackHeights = {375, 287, 188, 105, 15};
         for (int n = 0; n < stackHeights.length; n++) {
 //            if (etime.seconds() >= 24)
 //                break;
@@ -241,8 +241,8 @@ public class LeftAutoStatesLow extends LinearOpMode {
 
             claw.setPosition(1);
             sleep(300);
-            raiseHeightAndServoAndAngle(1160, 0.2, -90, 450);
-            slideServo.setPosition(0.39);
+            raiseHeightAndServoAndAngle(1160, 0.2, -93, 450);
+            slideServo.setPosition(0.38);
             sleep(400);
 
             if (n >= stackHeights.length-2)

@@ -55,6 +55,7 @@ public class TeleOpMode extends LinearOpMode {
 
     final double ppr = 1992.6;
 
+
     // operational constants
     double joyScale = 0.6;
     double motorMax = 0.6; // Limit motor power to this value for Andymark RUN_USING_ENCODER mode
@@ -155,7 +156,6 @@ public class TeleOpMode extends LinearOpMode {
         arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         claw = hardwareMap.servo.get("clawServo");
         slideServo = hardwareMap.servo.get("slideServo");
-        slideServo.setPosition(0.1);
 
 
         List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
@@ -429,7 +429,7 @@ public class TeleOpMode extends LinearOpMode {
     {
         if (gamepad2.dpad_left) {
             level = Height.LOW;
-            raiseHeight(1180);
+            raiseHeight(1190);
         }
     }
 
@@ -437,7 +437,7 @@ public class TeleOpMode extends LinearOpMode {
     {
         if (gamepad2.dpad_up) {
             level = Height.MEDIUM;
-            raiseHeight(1990);
+            raiseHeight(2000);
         }
     }
 
@@ -445,7 +445,7 @@ public class TeleOpMode extends LinearOpMode {
     {
         if (gamepad2.dpad_right) {
             level = Height.HIGH;
-            raiseHeight(2780);
+            raiseHeight(2790);
         }
     }
 
@@ -519,13 +519,13 @@ public class TeleOpMode extends LinearOpMode {
             stackCount = -1;
 
         if (stackCount % 4 == 0 && !angleChanged)
-            raiseHeight(355);
+            raiseHeight(395);
         else if (stackCount % 4 == 1 && !angleChanged)
-            raiseHeight(268);
+            raiseHeight(308);
         else if (stackCount % 4 == 2 && !angleChanged)
-            raiseHeight(180);
+            raiseHeight(220);
         else if (stackCount % 4 == 3 && stackCount != -1 && !angleChanged)
-            raiseHeight(93);
+            raiseHeight(133);
     }
 
     public void setAngle(int angle)
@@ -549,25 +549,19 @@ public class TeleOpMode extends LinearOpMode {
         {
             angleChanged = true;
             setAngle(-90);
-            if (slideServo.getPosition() != 0.6) {
-                slideExtended = -1;
-            }
+            slideExtended = -1;
         }
         if (gamepad2.b && (arm.getCurrentPosition() > 1000 || (level == Height.LOW || level == Height.MEDIUM || level == Height.HIGH)))
         {
             angleChanged = true;
             setAngle(90);
-            if (slideServo.getPosition() != 0.6) {
-                slideExtended = -1;
-            }
+            slideExtended = -1;
         }
         if (gamepad2.y && (arm.getCurrentPosition() > 1000 || (level == Height.LOW || level == Height.MEDIUM || level == Height.HIGH)))
         {
             angleChanged = false;
             setAngle(0);
-            if (slideServo.getPosition() != 0.6) {
-                slideExtended = 0;
-            }
+            slideExtended = -1;
         }
     }
 
@@ -592,21 +586,21 @@ public class TeleOpMode extends LinearOpMode {
         }
         else if (slideExtended == 1)
         {
-            slideServo.setPosition(0.6);
+            slideServo.setPosition(0.4);
         }
         else if (slideExtended == -1 && Math.abs(arm.getTargetPosition()-arm.getCurrentPosition()) <= 10)
         {
-            slideServo.setPosition(0.365);
+            slideServo.setPosition(0.2);
         }
         else if (slideExtended == -2)
-            slideServo.setPosition(0.415);
+            slideServo.setPosition(0.165);
         else if (slideExtended == -3)
-            slideServo.setPosition(0.315);
+            slideServo.setPosition(0.25);
 
 
-        if (gamepad2.left_bumper && (slideServo.getPosition() == 0.365 || slideServo.getPosition() == 0.315))
+        if (gamepad2.left_bumper && (slideServo.getPosition() == 0.2 || slideServo.getPosition() == 0.25))
             slideExtended = -2;
-        if (gamepad2.right_bumper && (slideServo.getPosition() == 0.415 || slideServo.getPosition() == 0.365))
+        if (gamepad2.right_bumper && (slideServo.getPosition() == 0.165 || slideServo.getPosition() == 0.2))
             slideExtended = -3;
     }
 
