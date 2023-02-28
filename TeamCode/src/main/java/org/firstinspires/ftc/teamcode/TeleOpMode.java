@@ -50,6 +50,8 @@ public class TeleOpMode extends LinearOpMode {
     boolean angleChanged  = false;
     double startTime;
     boolean resetOverride = false;
+    boolean goDown = false;
+    double startClaw;
 
     private List<DcMotor> motors;
 
@@ -315,6 +317,7 @@ public class TeleOpMode extends LinearOpMode {
             if (mco == MacroOverride.NONE && level == Height.NONE)
             {
                 mco = MacroOverride.STATE1;
+                level = Height.NONE;
                 start = System.currentTimeMillis();
                 start2Set = false;
 
@@ -322,12 +325,14 @@ public class TeleOpMode extends LinearOpMode {
             else if (mco == MacroOverride.STATE1)
             {
                 mco = MacroOverride.STATE2;
+                level = Height.HIGH;
                 start = System.currentTimeMillis();
                 rS = RaiseState.NONE;
             }
             else if (mco == MacroOverride.STATE2)
             {
                 mco = MacroOverride.STATE1;
+                level = Height.NONE;
                 start = System.currentTimeMillis();
                 start2Set = false;
             }
@@ -451,10 +456,14 @@ public class TeleOpMode extends LinearOpMode {
     {
         if (gamepad1.a && !gamepad1AisPressed)
         {
-            if (clawClosed)
+            if (clawClosed) {
                 clawClosed = false;
-            else
+                goDown = false;
+                startClaw = runtime.milliseconds();
+            }
+            else {
                 clawClosed = true;
+            }
 
             gamepad1AisPressed = true;
             startTime = runtime.milliseconds();
@@ -464,7 +473,22 @@ public class TeleOpMode extends LinearOpMode {
             gamepad1AisPressed = false;
 
         if (!clawClosed) {
+            if (level == Height.LOW || level == Height.MEDIUM || level == Height.HIGH && !goDown)
+            {
+                raiseHeight(arm.getCurrentPosition()-200);
+                goDown = true;
+            }
             claw.setPosition(OPEN);
+            if (level == Height.LOW || level == Height.MEDIUM || level == Height.HIGH && goDown) {
+                if (runtime.milliseconds() - startClaw >= 200) {
+                    if (level == Height.LOW)
+                        low();
+                    else if (level == Height.MEDIUM)
+                        medium();
+                    else if (level == Height.HIGH)
+                        high();
+                }
+            }
             if (overrides == LightOverride.NONE)
                 lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLUE);
             if (level == Height.CLAWUP) {
