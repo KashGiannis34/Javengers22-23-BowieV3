@@ -88,15 +88,11 @@ public class RightAutoStatesMediumAsync extends LinearOpMode {
         Pose2d startPose = new Pose2d(32,-62,Math.toRadians(90));
         robot.setPoseEstimate(startPose);
 
-        Pose2d endPose = new Pose2d(41.3,-7.5,Math.toRadians(0));
-        double slope = ((double)(endPose.getY()-startPose.getY()))/(endPose.getX()-startPose.getX());
-        Pose2d middlePose = new Pose2d(startPose.getX()+(turnY-startPose.getY())/slope, turnY);
-
         TrajectorySequence trajSeq = robot.trajectorySequenceBuilder(startPose)
                 .splineToConstantHeading(new Vector2d(12, -58), Math.toRadians(90))
                 .addTemporalMarker(0, () ->
                 {
-                    slide.setTargetPosition(390);
+                    slide.setTargetPosition(420);
                     slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     slide.setPower(-1);
 
@@ -105,27 +101,14 @@ public class RightAutoStatesMediumAsync extends LinearOpMode {
                     carousel.setPower(1);
                 })
                 .splineTo(new Vector2d(12, -28), Math.toRadians(90))
-                .splineToSplineHeading(new Pose2d(48,-11), Math.toRadians(0))
-                .UNSTABLE_addTemporalMarkerOffset(0.2, () -> {
-                    slideServo.setPosition(0.8);
-                })
-                .UNSTABLE_addTemporalMarkerOffset(0.6, () -> {
-                    claw.setPosition(0);
-                })
-                .UNSTABLE_addTemporalMarkerOffset(1.1, () -> {
-                    slide.setTargetPosition(450);
-                    slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    slide.setPower(1);
-                })
-                .UNSTABLE_addTemporalMarkerOffset(1.5, () -> {
-                    slideServo.setPosition(0.6);
-                })
+                .splineToSplineHeading(new Pose2d(60,-11), Math.toRadians(0))
                 .build();
 
         TrajectorySequence trajSeq2 = robot.trajectorySequenceBuilder(trajSeq.end())
-                .lineTo(new Vector2d(24, -11))
+                .lineTo(new Vector2d(22, -11))
                 .addTemporalMarker(0, () ->
                 {
+                    slideServo.setPosition(0.6);
                     slide.setTargetPosition(1985);
                     slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     slide.setPower(1);
@@ -135,14 +118,24 @@ public class RightAutoStatesMediumAsync extends LinearOpMode {
                     carousel.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     carousel.setPower(1);
                 })
-                .UNSTABLE_addTemporalMarkerOffset(0, () -> {
-                    slideServo.setPosition(0.75);
+                .addTemporalMarker(1.5, () -> {
+                    slideServo.setPosition(0.8);
                 })
-                .UNSTABLE_addTemporalMarkerOffset(0.5, () -> {
-                    claw.setPosition(0.4);
+                .build();
+
+        TrajectorySequence trajSeq3 = robot.trajectorySequenceBuilder(trajSeq2.end())
+                .lineTo(new Vector2d(60, -11))
+                .addTemporalMarker(0, () ->
+                {
+                    carousel.setTargetPosition(0);
+                    carousel.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    carousel.setPower(-1);
                 })
-                .UNSTABLE_addTemporalMarkerOffset(1, () -> {
+                .addTemporalMarker(0.75, () -> {
                     slideServo.setPosition(0.6);
+                    slide.setTargetPosition(420);
+                    slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    slide.setPower(-1);
                 })
                 .build();
 
@@ -297,18 +290,36 @@ public class RightAutoStatesMediumAsync extends LinearOpMode {
         }
         etime.reset();
 
-        int max = 390;
-        int min = 10;
         setMotorPos3(-29, 1170);
         slideServo.setPosition(0.87);
         sleep(600);
-        claw.setPosition(0.4);
+        claw.setPosition(0);
         sleep(300);
         slideServo.setPosition(0.6);
         claw.setPosition(0.4);
 
         robot.followTrajectorySequence(trajSeq);
+        claw.setPosition(1);
+        sleep(400);
+        raiseHeight(850);
         robot.followTrajectorySequence(trajSeq2);
+        sleep(100);
+        claw.setPosition(0.4);
+        sleep(30);
+        int coneHeight = 100;
+        int min = 10;
+        int[] stackHeights = {min+coneHeight*3, min+coneHeight*2, min+coneHeight, min};
+        for (int n = 0; n < 4; n++) {
+            robot.followTrajectorySequence(trajSeq3);
+            raiseHeight(stackHeights[n]);
+            claw.setPosition(1);
+            sleep(500);
+            raiseHeight(800);
+            robot.followTrajectorySequence(trajSeq2);
+            sleep(100);
+            claw.setPosition(0.4);
+            sleep(400);
+        }
 
 
 //        int[] stackHeights = {max, min+(max-min)*3/4+20, min+(max-min)*2/4, min+(max-min)/4, min};
@@ -338,20 +349,20 @@ public class RightAutoStatesMediumAsync extends LinearOpMode {
 
         claw.setPosition(0.4);
         slideServo.setPosition(0.6);
-        if (tagOfInterest == null || tagOfInterest.id == RIGHT)
-            robot.followTrajectorySequence(parkRight);
-        else if (tagOfInterest.id == MIDDLE)
-            robot.followTrajectorySequence(parkMiddle);
-        else if (tagOfInterest.id == LEFT)
-            robot.followTrajectorySequence(parkLeft);
-        else
-            robot.followTrajectorySequence(parkRight);
-
-        while (!isStopRequested() && opModeIsActive())
-        {
-            telemetry.addData("slideServo pos: ", slideServo.getPosition());
-            telemetry.update();
-        }
+//        if (tagOfInterest == null || tagOfInterest.id == RIGHT)
+//            robot.followTrajectorySequence(parkRight);
+//        else if (tagOfInterest.id == MIDDLE)
+//            robot.followTrajectorySequence(parkMiddle);
+//        else if (tagOfInterest.id == LEFT)
+//            robot.followTrajectorySequence(parkLeft);
+//        else
+//            robot.followTrajectorySequence(parkRight);
+//
+//        while (!isStopRequested() && opModeIsActive())
+//        {
+//            telemetry.addData("slideServo pos: ", slideServo.getPosition());
+//            telemetry.update();
+//        }
     }
 
     void raiseHeight(double num)
