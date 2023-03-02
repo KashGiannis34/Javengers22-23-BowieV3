@@ -475,7 +475,12 @@ public class TeleOpMode extends LinearOpMode {
         if (!clawClosed) {
             if (level == Height.LOW || level == Height.MEDIUM || level == Height.HIGH && !goDown)
             {
-                raiseHeight(arm.getCurrentPosition()-200);
+                if (level == Height.LOW)
+                    raiseHeight(990);
+                else if (level == Height.MEDIUM)
+                    raiseHeight(1800);
+                else if (level == Height.HIGH)
+                    raiseHeight(2590);
                 goDown = true;
             }
             claw.setPosition(OPEN);
@@ -632,10 +637,16 @@ public class TeleOpMode extends LinearOpMode {
             arm.setTargetPosition(height);
             arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             arm.setPower(-1);
-        } else {
+        } else if (arm.getCurrentPosition() < height) {
             arm.setTargetPosition(height);
             arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             arm.setPower(1);
+        }
+        else {
+            if (arm.getCurrentPosition() > 10)
+                arm.setPower(0.2);
+            else
+                arm.setPower(0);
         }
     }
 

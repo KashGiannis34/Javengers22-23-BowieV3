@@ -3,10 +3,12 @@ package com.example.trajectorytesting;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.noahbres.meepmeep.MeepMeep;
+import com.noahbres.meepmeep.core.colorscheme.scheme.ColorSchemeBlueLight;
 import com.noahbres.meepmeep.roadrunner.DefaultBotBuilder;
 import com.noahbres.meepmeep.roadrunner.entity.RoadRunnerBotEntity;
 
 public class TrajectoryTesting {
+    static ColorSchemeBlueLight cb = new ColorSchemeBlueLight();
     public static void main(String[] args) {
         MeepMeep meepMeep = new MeepMeep(700);
 
@@ -14,7 +16,7 @@ public class TrajectoryTesting {
         Pose2d startPose = new Pose2d(32,-62,Math.toRadians(90));
         Pose2d endPose = new Pose2d(37,-11,Math.toRadians(0));
         double slope = ((double)(endPose.getY()-startPose.getY()))/(endPose.getX()-startPose.getX());
-        Pose2d middlePose = new Pose2d(startPose.getX()+18/slope, turnY);
+        Pose2d middlePose = new Pose2d(startPose.getX()+(turnY-startPose.getY())/slope, turnY);
 
 
         RoadRunnerBotEntity myBot = new DefaultBotBuilder(meepMeep)
@@ -30,6 +32,7 @@ public class TrajectoryTesting {
         meepMeep.setBackground(MeepMeep.Background.FIELD_POWERPLAY_OFFICIAL)
                 .setDarkMode(false)
                 .setBackgroundAlpha(0.3f)
+                .setTheme(cb)
                 .addEntity(myBot)
                 .start();
 

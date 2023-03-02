@@ -1,8 +1,9 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.archived;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
@@ -10,6 +11,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.teamcode.Brobot;
 import org.firstinspires.ftc.teamcode.barcode.AprilTagDetectionPipeline;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 import org.openftc.apriltag.AprilTagDetection;
@@ -19,8 +21,9 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 
 import java.util.ArrayList;
 
-@Autonomous (name = "Right Auto States Medium")
-public class RightAutoStatesMedium extends LinearOpMode {
+@Disabled
+@Autonomous (name = "Left Auto States Low Archived")
+public class LeftAutoStatesLowArchived extends LinearOpMode {
     Brobot robot;
     //ColorSensor color;
     DcMotor slide, carousel;
@@ -37,7 +40,6 @@ public class RightAutoStatesMedium extends LinearOpMode {
 
     static final double FEET_PER_METER = 3.28084;
     boolean exit = false;
-    boolean exitTrajAsync = false;
 
     // Lens intrinsics
     // UNITS ARE PIXELS
@@ -84,77 +86,32 @@ public class RightAutoStatesMedium extends LinearOpMode {
         carousel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         carousel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        double turnY = -44;
-        Pose2d startPose = new Pose2d(32,-62,Math.toRadians(90));
+        Pose2d startPose = new Pose2d(-40,-62,Math.toRadians(90));
         robot.setPoseEstimate(startPose);
 
-        Pose2d endPose = new Pose2d(41.3,-7.5,Math.toRadians(0));
-        double slope = ((double)(endPose.getY()-startPose.getY()))/(endPose.getX()-startPose.getX());
-        Pose2d middlePose = new Pose2d(startPose.getX()+(turnY-startPose.getY())/slope, turnY);
-
         TrajectorySequence trajSeq = robot.trajectorySequenceBuilder(startPose)
-//                .splineToConstantHeading(new Vector2d(12, -58), Math.toRadians(90))
-//                .splineTo(new Vector2d(12, -28), Math.toRadians(90))
-//                .splineToSplineHeading(new Pose2d(41.5,-11), Math.toRadians(0))
-                .lineToSplineHeading(middlePose)
-                .addTemporalMarker(0, () ->
-                {
-                    slide.setTargetPosition(390);
-                    slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    slide.setPower(-1);
-
-                    carousel.setTargetPosition(0);
-                    carousel.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    carousel.setPower(1);
-                })
-                .lineToSplineHeading(endPose)
+                .splineToConstantHeading(new Vector2d(-12, -55), Math.toRadians(90))
+                .splineTo(new Vector2d(-12, -25), Math.toRadians(90))
+                .splineTo(new Vector2d(-47,-8), Math.toRadians(180))
                 .build();
 
         TrajectorySequence parkRight = robot.trajectorySequenceBuilder(trajSeq.end())
-                .lineToConstantHeading(new Vector2d(60.5, -7.5))
-                .addTemporalMarker(0, () ->{
-                    carousel.setTargetPosition(0);
-                    carousel.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    carousel.setPower(1);
-                })
-                .addTemporalMarker(0.4, () ->{
-                    slide.setTargetPosition(10);
-                    slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    slide.setPower(-1);
-                })
+                .lineToConstantHeading(new Vector2d(-10, -8))
                 .build();
 
         TrajectorySequence parkMiddle = robot.trajectorySequenceBuilder(trajSeq.end())
-                .lineToConstantHeading(new Vector2d(36.5, -7.5))
-                .addTemporalMarker(0, () ->{
-                    carousel.setTargetPosition(0);
-                    carousel.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    carousel.setPower(1);
-                })
-                .addTemporalMarker(0.4, () ->{
-                    slide.setTargetPosition(10);
-                    slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    slide.setPower(-1);
-                })
+                .lineToConstantHeading(new Vector2d(-34, -8))
                 .build();
 
         TrajectorySequence parkLeft = robot.trajectorySequenceBuilder(trajSeq.end())
-                .lineToConstantHeading(new Vector2d(13, -7.5))
-                .addTemporalMarker(0, () ->{
-                    carousel.setTargetPosition(0);
-                    carousel.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    carousel.setPower(1);
-                })
-                .addTemporalMarker(0.4, () ->{
-                    slide.setTargetPosition(10);
-                    slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    slide.setPower(-1);
-                })
+                .lineToConstantHeading(new Vector2d(-58, -8))
                 .build();
 
         claw.setPosition(1);
-        slideServo.setPosition(0.6);
-        sleep(50);
+        slideServo.setPosition(0);
+        sleep(100);
+        raiseHeight2(50);
+        sleep(10);
         setAngle(0);
         sleep(10);
 
@@ -261,46 +218,46 @@ public class RightAutoStatesMedium extends LinearOpMode {
         }
         etime.reset();
 
-        int coneHeight = 100;
-        int min = 10;
-        setMotorPos3(-29, 1170);
-        slideServo.setPosition(0.87);
+        setMotorPos3(48, 1170);
+        slideServo.setPosition(0.585);
         sleep(600);
         claw.setPosition(0.4);
         sleep(300);
-        slideServo.setPosition(0.6);
-        claw.setPosition(0.4);
+        slideServo.setPosition(0);
+        setMotorPos3(0, 375);
 
         robot.followTrajectorySequence(trajSeq);
+        claw.setPosition(0.4);
 
-
-        int[] stackHeights = {min+coneHeight*4, min+coneHeight*3, min+coneHeight*2, min+coneHeight, min};
+        int[] stackHeights = {375, 287, 188, 105, 15};
         for (int n = 0; n < stackHeights.length; n++) {
 //            if (etime.seconds() >= 24)
 //                break;
-            setMotorPosExtend(0, stackHeights[n], 0.95);
-            slideServo.setPosition(1);
-            if (n==0)
-                sleep(300);
-            else
-                sleep(200);
+            if (n!=0) {
+                setMotorPosExtend(0, stackHeights[n], 0.55);
+                slideServo.setPosition(0.62);
+            }
+            else {
+                slideServo.setPosition(0.62);
+                sleep(550);
+            }
+
             claw.setPosition(1);
-            sleep(500);
-            raiseHeightAndServoAndAngle(1975, 0.6, 147.5, stackHeights[n]+180);
-            slideServo.setPosition(0.925);
-            sleep(500);
+            sleep(300);
+            raiseHeightAndServoAndAngle(1160, 0.2, -93, 450);
+            slideServo.setPosition(0.38);
+            sleep(400);
 
             if (n >= stackHeights.length-2)
                 claw.setPosition(0.4);
             else
                 claw.setPosition(0);
             sleep(300);
-            slideServo.setPosition(0.6);
+            slideServo.setPosition(0);
             sleep(100);
         }
 
         claw.setPosition(0.4);
-        slideServo.setPosition(0.6);
         if (tagOfInterest == null || tagOfInterest.id == RIGHT)
             robot.followTrajectorySequence(parkRight);
         else if (tagOfInterest.id == MIDDLE)
@@ -309,6 +266,8 @@ public class RightAutoStatesMedium extends LinearOpMode {
             robot.followTrajectorySequence(parkLeft);
         else
             robot.followTrajectorySequence(parkRight);
+
+        setMotorPosExtend(0, 10, 0);
 
         while (!isStopRequested() && opModeIsActive())
         {
@@ -380,7 +339,7 @@ public class RightAutoStatesMedium extends LinearOpMode {
                 count++;
             }
 
-            if (slide.getCurrentPosition()-num >= 0 && carousel.getCurrentPosition()-pos >= 0) {
+            if (slide.getCurrentPosition()-num >= 0 && carousel.getCurrentPosition()-pos <= 0) {
                 slide.setPower(0.2);
                 carousel.setPower(0);
                 break;
@@ -487,7 +446,7 @@ public class RightAutoStatesMedium extends LinearOpMode {
             if (Math.abs(getCarouselAngle()) <= 30)
                 slideServo.setPosition(servoPos);
 
-            if (slide.getCurrentPosition()-height <= 10 && carousel.getCurrentPosition()-pos <= 5) {
+            if (slide.getCurrentPosition()-height <= 10 && carousel.getCurrentPosition()-pos >= -5) {
                 slide.setPower(0.2);
                 carousel.setPower(0);
                 break;
@@ -498,6 +457,40 @@ public class RightAutoStatesMedium extends LinearOpMode {
     double getCarouselAngle()
     {
         return (carousel.getCurrentPosition()*360.0/ppr);
+    }
+
+    void setMotorPos2(double angle, double height)
+    {
+        int pos = (int)(ppr*angle/360.0);
+        while (opModeIsActive()) {
+            if (slide.getCurrentPosition() > height) {
+                slide.setTargetPosition((int) height);
+                slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                slide.setPower(-0.8);
+            }
+            else {
+                slide.setTargetPosition((int) height);
+                slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                slide.setPower(1);
+            }
+
+            if (carousel.getCurrentPosition() > (int) (ppr * angle / 360.0)) {
+                carousel.setTargetPosition(pos);
+                carousel.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                carousel.setPower(-0.7);
+            }
+            else {
+                carousel.setTargetPosition(pos);
+                carousel.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                carousel.setPower(0.7);
+            }
+
+            if (slide.getCurrentPosition()-height >= 0 && carousel.getCurrentPosition()-pos >= -2 && carousel.getCurrentPosition()-pos <= 2) {
+                slide.setPower(0.2);
+                carousel.setPower(0);
+                break;
+            }
+        }
     }
 
     void setMotorPos3(double angle, double height)
@@ -520,95 +513,18 @@ public class RightAutoStatesMedium extends LinearOpMode {
                     carousel.setTargetPosition(pos);
                     carousel.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     carousel.setPower(-0.7);
-                } else if (carousel.getCurrentPosition() < (int) (ppr * angle / 360.0)) {
+                } else {
                     carousel.setTargetPosition(pos);
                     carousel.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     carousel.setPower(0.7);
                 }
-                else
-                    carousel.setPower(0);
             }
 
-            if (Math.abs(slide.getCurrentPosition()-height) >= -5 && carousel.getCurrentPosition()-pos >= -5 && carousel.getCurrentPosition()-pos <= 5) {
+            if (slide.getCurrentPosition()-height >= 0 && carousel.getCurrentPosition()-pos >= -2 && carousel.getCurrentPosition()-pos <= 2) {
                 slide.setPower(0.2);
                 carousel.setPower(0);
                 break;
             }
-        }
-    }
-
-    void setMotorPos4(double angle, double height)
-    {
-        int pos = (int)(ppr*angle/360.0);
-        while (opModeIsActive()) {
-            if (slide.getCurrentPosition() > height) {
-                slide.setTargetPosition((int) height);
-                slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                slide.setPower(-0.8);
-            }
-            else if (slide.getCurrentPosition() < height) {
-                slide.setTargetPosition((int) height);
-                slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                slide.setPower(1);
-            }
-            else
-                slide.setPower(0.2);
-
-            if (slide.getCurrentPosition() > 500) {
-                if (carousel.getCurrentPosition() > (int) (ppr * angle / 360.0)) {
-                    carousel.setTargetPosition(pos);
-                    carousel.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    carousel.setPower(-0.7);
-                } else if (carousel.getCurrentPosition() < (int) (ppr * angle / 360.0)) {
-                    carousel.setTargetPosition(pos);
-                    carousel.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    carousel.setPower(0.7);
-                }
-                else
-                    carousel.setPower(0);
-            }
-
-            if (Math.abs(slide.getCurrentPosition()-height) <= 10 && carousel.getCurrentPosition()-pos >= -5) {
-                slide.setPower(0.2);
-                carousel.setPower(0);
-                break;
-            }
-        }
-    }
-
-    public void setMotorPos4Async(double angle, double height)
-    {
-        int pos = (int)(ppr*angle/360.0);
-        if (!exitTrajAsync) {
-            if (slide.getCurrentPosition() > height) {
-                slide.setTargetPosition((int) height);
-                slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                slide.setPower(-0.8);
-            } else if (slide.getCurrentPosition() < height) {
-                slide.setTargetPosition((int) height);
-                slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                slide.setPower(1);
-            } else
-                slide.setPower(0.2);
-
-            if (slide.getCurrentPosition() > 500) {
-                if (carousel.getCurrentPosition() > (int) (ppr * angle / 360.0)) {
-                    carousel.setTargetPosition(pos);
-                    carousel.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    carousel.setPower(-0.7);
-                } else if (carousel.getCurrentPosition() < (int) (ppr * angle / 360.0)) {
-                    carousel.setTargetPosition(pos);
-                    carousel.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    carousel.setPower(0.7);
-                } else
-                    carousel.setPower(0);
-            }
-        }
-
-        if (Math.abs(slide.getCurrentPosition()-height) <= 10 && carousel.getCurrentPosition()-pos >= -5) {
-            slide.setPower(0.2);
-            carousel.setPower(0);
-            exitTrajAsync = true;
         }
     }
 
