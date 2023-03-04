@@ -84,7 +84,7 @@ public class RightAutoStatesLow extends LinearOpMode {
         carousel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         double turnY = -44;
-        Pose2d startPose = new Pose2d(32,-62,Math.toRadians(90));
+        Pose2d startPose = new Pose2d(31.8,-62,Math.toRadians(90));
         robot.setPoseEstimate(startPose);
 
         Pose2d endPose = new Pose2d(41.5,-10,Math.toRadians(0));
@@ -108,7 +108,7 @@ public class RightAutoStatesLow extends LinearOpMode {
                 .build();
 
         TrajectorySequence parkLeft = robot.trajectorySequenceBuilder(trajSeq.end())
-                .lineToConstantHeading(new Vector2d(12.5, -10))
+                .lineToConstantHeading(new Vector2d(14, -10))
                 .build();
 
         claw.setPosition(1);
@@ -222,7 +222,7 @@ public class RightAutoStatesLow extends LinearOpMode {
 
         int max = 390;
         int min = 10;
-        setMotorPos3(-29, 1170);
+        setMotorPos3(-28, 1150);
         slideServo.setPosition(0.87);
         sleep(600);
         claw.setPosition(0.4);
@@ -236,14 +236,14 @@ public class RightAutoStatesLow extends LinearOpMode {
 
         int[] stackHeights = {max, min+(max-min)*3/4, min+(max-min)*2/4, min+(max-min)/4, min};
         for (int n = 0; n < stackHeights.length; n++) {
-//            if (etime.seconds() >= 24)
-//                break;
+            if (etime.seconds() >= 25)
+                break;
             setMotorPosExtend(0, stackHeights[n], 0.95);
             slideServo.setPosition(1);
             sleep(300);
             claw.setPosition(1);
             sleep(500);
-            raiseHeightAndServoAndAngle(1180, 0.6, 60, stackHeights[n]+180);
+            raiseHeightAndServoAndAngle(1150, 0.6, 60, stackHeights[n]+180);
             slideServo.setPosition(0.775);
             sleep(300);
 
@@ -338,7 +338,7 @@ public class RightAutoStatesLow extends LinearOpMode {
                 count++;
             }
 
-            if (slide.getCurrentPosition()-num >= 0 && carousel.getCurrentPosition()-pos >= 0) {
+            if (slide.getCurrentPosition()-num >= 0 && carousel.getCurrentPosition()-pos >= 0 && carousel.getCurrentPosition()-pos <= 10) {
                 slide.setPower(0.2);
                 carousel.setPower(0);
                 break;
