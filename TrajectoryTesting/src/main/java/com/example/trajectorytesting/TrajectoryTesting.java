@@ -4,11 +4,12 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.noahbres.meepmeep.MeepMeep;
 import com.noahbres.meepmeep.core.colorscheme.scheme.ColorSchemeBlueLight;
+import com.noahbres.meepmeep.core.colorscheme.scheme.ColorSchemeRedLight;
 import com.noahbres.meepmeep.roadrunner.DefaultBotBuilder;
 import com.noahbres.meepmeep.roadrunner.entity.RoadRunnerBotEntity;
 
 public class TrajectoryTesting {
-    static ColorSchemeBlueLight cb = new ColorSchemeBlueLight();
+    static ColorSchemeRedLight cb = new ColorSchemeRedLight();
     public static void main(String[] args) {
         MeepMeep meepMeep = new MeepMeep(700);
 
@@ -24,8 +25,13 @@ public class TrajectoryTesting {
                 .setConstraints(32.281655, 30, Math.toRadians(150), Math.toRadians(150), 13.0)
                 .followTrajectorySequence(drive ->
                         drive.trajectorySequenceBuilder(startPose)
-                                .lineToSplineHeading(middlePose)
-                                .lineToSplineHeading(endPose)
+                                .forward(4)
+                                .strafeLeft(8)
+                                .forward(4)
+                                .back(6)
+                                .strafeLeft(12)
+                                .forward(50)
+                                .strafeRight(50)
                                 .build()
                 );
 

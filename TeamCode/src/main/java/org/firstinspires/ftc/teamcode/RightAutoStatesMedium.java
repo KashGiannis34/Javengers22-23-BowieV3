@@ -85,7 +85,7 @@ public class RightAutoStatesMedium extends LinearOpMode {
         carousel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         double turnY = -44;
-        Pose2d startPose = new Pose2d(32,-62,Math.toRadians(90));
+        Pose2d startPose = new Pose2d(31.8,-62,Math.toRadians(90));
         robot.setPoseEstimate(startPose);
 
         Pose2d endPose = new Pose2d(41.3,-7.5,Math.toRadians(0));
@@ -139,7 +139,7 @@ public class RightAutoStatesMedium extends LinearOpMode {
                 .build();
 
         TrajectorySequence parkLeft = robot.trajectorySequenceBuilder(trajSeq.end())
-                .lineToConstantHeading(new Vector2d(13, -7.5))
+                .lineToConstantHeading(new Vector2d(14, -7.5))
                 .addTemporalMarker(0, () ->{
                     carousel.setTargetPosition(0);
                     carousel.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -263,8 +263,8 @@ public class RightAutoStatesMedium extends LinearOpMode {
 
         int coneHeight = 100;
         int min = 10;
-        setMotorPos3(-29, 1170);
-        slideServo.setPosition(0.87);
+        setMotorPos3(-28, 1150);
+        slideServo.setPosition(0.855);
         sleep(600);
         claw.setPosition(0.4);
         sleep(300);
@@ -276,8 +276,8 @@ public class RightAutoStatesMedium extends LinearOpMode {
 
         int[] stackHeights = {min+coneHeight*4, min+coneHeight*3, min+coneHeight*2, min+coneHeight, min};
         for (int n = 0; n < stackHeights.length; n++) {
-//            if (etime.seconds() >= 24)
-//                break;
+            if (etime.seconds() >= 25)
+                break;
             setMotorPosExtend(0, stackHeights[n], 0.95);
             slideServo.setPosition(1);
             if (n==0)
@@ -286,10 +286,9 @@ public class RightAutoStatesMedium extends LinearOpMode {
                 sleep(200);
             claw.setPosition(1);
             sleep(500);
-            raiseHeightAndServoAndAngle(1975, 0.6, 147.5, stackHeights[n]+180);
-            slideServo.setPosition(0.925);
-            sleep(500);
-
+            raiseHeightAndServoAndAngle(1955, 0.6, 143, stackHeights[n]+180);
+            slideServo.setPosition(0.91);
+            sleep(550);
             if (n >= stackHeights.length-2)
                 claw.setPosition(0.4);
             else
@@ -331,7 +330,7 @@ public class RightAutoStatesMedium extends LinearOpMode {
                 slide.setPower(1);
             }
 
-            if (slide.getCurrentPosition()-num >= 0) {
+            if (slide.getCurrentPosition()-num <= 10) {
                 slide.setPower(0.2);
                 break;
             }
@@ -612,19 +611,6 @@ public class RightAutoStatesMedium extends LinearOpMode {
         }
     }
 
-    void raiseHeight2(int num)
-    {
-        slide.setTargetPosition(num+zeroPos);
-        if (slide.getCurrentPosition() > num+zeroPos)
-            slide.setPower(-0.4);
-        else
-            slide.setPower(1);
-        slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-        while (slide.isBusy()) {
-
-        }
-    }
 
     void tagToTelemetry(AprilTagDetection detection)
     {

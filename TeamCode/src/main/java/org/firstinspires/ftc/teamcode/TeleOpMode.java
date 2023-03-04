@@ -39,6 +39,7 @@ public class TeleOpMode extends LinearOpMode {
     double kP = 0.01;
     double start = 0;
     double startDown = 0;
+    double start2 = 0;
 
 
     boolean gamepad1AisPressed = false;
@@ -96,7 +97,8 @@ public class TeleOpMode extends LinearOpMode {
     {
         NONE,
         STATE1,
-        STATE2
+        STATE2,
+        STATE3
     }
 
     public enum RaiseState
@@ -238,6 +240,8 @@ public class TeleOpMode extends LinearOpMode {
             telemetry.addData("time elapsed (seconds): ", runtime.seconds());
             telemetry.addData("angleChanged: ", angleChanged);
             telemetry.addData("heading: ", getAngle());
+            telemetry.addData("target heading: ", targetHeading);
+            telemetry.addData("error: ", correctionPower*(180.0/0.8));
             telemetry.addData("slide servo: ", slideServo.getPosition());
             telemetry.addData("mco: ", mco);
 
@@ -269,12 +273,16 @@ public class TeleOpMode extends LinearOpMode {
         X1 = gamepad1.left_stick_x * joyScale;
         X2 = gamepad1.right_stick_x * joyScale;
 //        targetHeading += gamepad1.right_stick_x*joyScale;
-//        if (targetHeading > 180)
+//        if (targetHeading > 360)
 //            targetHeading -= 360;
-//        else if (targetHeading <= -180)
+//        else if (targetHeading < 0)
 //            targetHeading += 360;
-//        double error = targetHeading - getAngle();
-//        correctionPower = error * kP;
+//        double error;
+//        if (Math.abs(targetHeading - getAngle()) < 360-Math.abs(targetHeading - getAngle()))
+//            error = (targetHeading - getAngle() > 0 ? 1:-1) * Math.abs(targetHeading - getAngle());
+//        else
+//            error = (targetHeading - getAngle() > 0 ? -1:1) * 360-Math.abs(targetHeading - getAngle());
+//        correctionPower = error * 0.01;
 
 
         // Forward/back movement
@@ -290,6 +298,11 @@ public class TeleOpMode extends LinearOpMode {
         RR += X1;
 
         // Rotation movement
+//        LF += correctionPower;
+//        RF -= correctionPower;
+//        LR += correctionPower;
+//        RR -= correctionPower;
+
         LF += X2;
         RF -= X2;
         LR += X2;
@@ -314,12 +327,13 @@ public class TeleOpMode extends LinearOpMode {
     {
         if (gamepad1.x && !gamepad1X)
         {
-            if (mco == MacroOverride.NONE && level == Height.NONE)
+            if (mco == MacroOverride.NONE && (level == Height.NONE || level == Height.CLAWUP))
             {
                 mco = MacroOverride.STATE1;
                 level = Height.NONE;
                 start = System.currentTimeMillis();
                 start2Set = false;
+                start2 = 0;
 
             }
             else if (mco == MacroOverride.STATE1)
@@ -331,10 +345,19 @@ public class TeleOpMode extends LinearOpMode {
             }
             else if (mco == MacroOverride.STATE2)
             {
-                mco = MacroOverride.STATE1;
+                mco = MacroOverride.STATE3;
                 level = Height.NONE;
                 start = System.currentTimeMillis();
                 start2Set = false;
+                start2 = 0;
+            }
+            if (mco == MacroOverride.STATE3)
+            {
+                mco = MacroOverride.STATE2;
+                level = Height.HIGH;
+                start = System.currentTimeMillis();
+                rS = RaiseState.NONE;
+
             }
             gamepad1X = true;
         }
@@ -352,7 +375,7 @@ public class TeleOpMode extends LinearOpMode {
 
         if (resetOverride && Math.abs(getCarouselAngle()) <= 10)
         {
-            slideServo.setPosition(0.5);
+            slideServo.setPosition(0.6);
             resetOverride = false;
         }
 
@@ -362,8 +385,8 @@ public class TeleOpMode extends LinearOpMode {
 
             if (System.currentTimeMillis() - start >= 200) {
                 if (slideServo.getPosition() != 0.65 && !start2Set)
-                    slideServo.setPosition(0.45);
-                double start2 = 0;
+                    slideServo.setPosition(0.8);
+
                 if (!start2Set) {
                     start2 = System.currentTimeMillis();
                     start2Set = true;
@@ -374,7 +397,7 @@ public class TeleOpMode extends LinearOpMode {
                     setAngle(-90);
                     raiseHeight(5);
                     if (Math.abs(-90-getCarouselAngle()) <= 5 && arm.getCurrentPosition() <= 10)
-                        slideServo.setPosition(0.65);
+                        slideServo.setPosition(0.9);
                 }
             }
         }
@@ -388,15 +411,13 @@ public class TeleOpMode extends LinearOpMode {
                     rS = RaiseState.STATE1;
                 }
                 if (arm.getCurrentPosition() >= 550 && rS == RaiseState.STATE1) {
-                    slideServo.setPosition(0);
+                    slideServo.setPosition(0.6);
                     rS = RaiseState.STATE2;
                 }
 
                 if (rS == RaiseState.STATE2) {
                     raiseHeight(2820);
                     setAngle(90);
-                    if (arm.getCurrentPosition() >= 2800 && Math.abs(getCarouselAngle()-90) <= 5)
-                        slideServo.setPosition(0.4);
                 }
             }
         }
@@ -432,7 +453,7 @@ public class TeleOpMode extends LinearOpMode {
     {
         if (gamepad2.dpad_left) {
             level = Height.LOW;
-            raiseHeight(1190);
+            raiseHeight(1150);
         }
     }
 
@@ -609,7 +630,7 @@ public class TeleOpMode extends LinearOpMode {
 
         if (slideExtended == 0)
         {
-            slideServo.setPosition(0.5);
+            slideServo.setPosition(0.6);
         }
         else if (slideExtended == 1)
         {
@@ -698,12 +719,12 @@ public class TeleOpMode extends LinearOpMode {
         Orientation orientation = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
 
         double deltaAngle = orientation.firstAngle - lastAngles.firstAngle;
-        if (deltaAngle > 180)
-            deltaAngle -= 360;
-        else if (deltaAngle <= -180)
-            deltaAngle += 360;
 
         currAngle += deltaAngle;
+        if (currAngle > 360)
+            currAngle -= 360;
+        else if (currAngle < 0)
+            currAngle += 360;
         lastAngles = orientation;
 
         return currAngle;

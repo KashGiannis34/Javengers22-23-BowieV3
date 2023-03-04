@@ -84,7 +84,7 @@ public class LeftAutoStatesMedium extends LinearOpMode {
         carousel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         double turnY = -44;
-        Pose2d startPose = new Pose2d(-40,-62,Math.toRadians(90));
+        Pose2d startPose = new Pose2d(-40.2,-62,Math.toRadians(90));
         robot.setPoseEstimate(startPose);
 
         TrajectorySequence trajSeq = robot.trajectorySequenceBuilder(startPose)
@@ -106,7 +106,7 @@ public class LeftAutoStatesMedium extends LinearOpMode {
                 .build();
 
         TrajectorySequence parkRight = robot.trajectorySequenceBuilder(trajSeq.end())
-                .lineToConstantHeading(new Vector2d(-12.5, -8))
+                .lineToConstantHeading(new Vector2d(-14.5, -8))
                 .addTemporalMarker(0, () ->{
                     carousel.setTargetPosition(0);
                     carousel.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -120,7 +120,7 @@ public class LeftAutoStatesMedium extends LinearOpMode {
                 .build();
 
         TrajectorySequence parkMiddle = robot.trajectorySequenceBuilder(trajSeq.end())
-                .lineToConstantHeading(new Vector2d(-36.5, -8))
+                .lineToConstantHeading(new Vector2d(-38.5, -8))
                 .addTemporalMarker(0, () ->{
                     carousel.setTargetPosition(0);
                     carousel.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -134,7 +134,7 @@ public class LeftAutoStatesMedium extends LinearOpMode {
                 .build();
 
         TrajectorySequence parkLeft = robot.trajectorySequenceBuilder(trajSeq.end())
-                .lineToConstantHeading(new Vector2d(-60.5, -8))
+                .lineToConstantHeading(new Vector2d(-62.5, -8))
                 .addTemporalMarker(0, () ->{
                     carousel.setTargetPosition(0);
                     carousel.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -258,7 +258,7 @@ public class LeftAutoStatesMedium extends LinearOpMode {
 
         int max = 390;
         int min = 10;
-        setMotorPos3(50, 1170);
+        setMotorPos3(52, 1150);
         slideServo.setPosition(0.92);
         sleep(500);
         claw.setPosition(0.4);
@@ -271,8 +271,8 @@ public class LeftAutoStatesMedium extends LinearOpMode {
 
         int[] stackHeights = {max, min+(max-min)*3/4, min+(max-min)*2/4, min+(max-min)/4, min};
         for (int n = 0; n < stackHeights.length; n++) {
-//            if (etime.seconds() >= 24)
-//                break;
+            if ((etime.seconds() >= 24.5 && tagOfInterest.id == RIGHT) || etime.seconds() >= 25)
+                break;
             if (n!=0)
                 setMotorPosExtend(0, stackHeights[n], 0.95);
             slideServo.setPosition(1);
@@ -282,8 +282,8 @@ public class LeftAutoStatesMedium extends LinearOpMode {
                 sleep(200);
             claw.setPosition(1);
             sleep(400);
-            raiseHeightAndServoAndAngle(1975, 0.6, -144.7, stackHeights[n]+180);
-            slideServo.setPosition(0.913);
+            raiseHeightAndServoAndAngle(1960, 0.6, -146.5, stackHeights[n]+180);
+            slideServo.setPosition(0.91);
             sleep(475);
 
             if (n >= stackHeights.length-2)

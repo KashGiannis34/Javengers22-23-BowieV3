@@ -84,7 +84,7 @@ public class LeftAutoStatesLow extends LinearOpMode {
         carousel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         double turnY = -44;
-        Pose2d startPose = new Pose2d(-40,-62,Math.toRadians(90));
+        Pose2d startPose = new Pose2d(-40.2,-62,Math.toRadians(90));
         robot.setPoseEstimate(startPose);
 
         TrajectorySequence trajSeq = robot.trajectorySequenceBuilder(startPose)
@@ -258,7 +258,7 @@ public class LeftAutoStatesLow extends LinearOpMode {
 
         int max = 390;
         int min = 10;
-        setMotorPos3(50, 1170);
+        setMotorPos3(52, 1150);
         slideServo.setPosition(0.92);
         sleep(600);
         claw.setPosition(0.4);
@@ -271,14 +271,14 @@ public class LeftAutoStatesLow extends LinearOpMode {
 
         int[] stackHeights = {max, min+(max-min)*3/4, min+(max-min)*2/4, min+(max-min)/4, min};
         for (int n = 0; n < stackHeights.length; n++) {
-//            if (etime.seconds() >= 24)
-//                break;
+            if (etime.seconds() >= 25)
+                break;
             setMotorPosExtend(0, stackHeights[n], 0.95);
             slideServo.setPosition(1);
             sleep(300);
             claw.setPosition(1);
             sleep(500);
-            raiseHeightAndServoAndAngle(1180, 0.6, -67.5, stackHeights[n]+180);
+            raiseHeightAndServoAndAngle(1150, 0.6, -67.5, stackHeights[n]+180);
             slideServo.setPosition(0.82);
             sleep(300);
 
@@ -371,7 +371,7 @@ public class LeftAutoStatesLow extends LinearOpMode {
                 count++;
             }
 
-            if (slide.getCurrentPosition()-num >= 0 && carousel.getCurrentPosition()-pos <= 0) {
+            if (slide.getCurrentPosition()-num >= 0 && carousel.getCurrentPosition()-pos <= 0 && carousel.getCurrentPosition()-pos <= 10) {
                 slide.setPower(0.2);
                 carousel.setPower(0);
                 break;
